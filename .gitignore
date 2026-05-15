@@ -1,0 +1,23 @@
+# .NET
+**/bin/
+**/obj/
+*.user
+
+# Python
+**/venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+
+# Node
+node_modules/
+
+# Rider/VS
+.idea/
+.vs/
+*.suo
+
+appsettings.Development.json
