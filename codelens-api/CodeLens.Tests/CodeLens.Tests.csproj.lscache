@@ -370,6 +370,7 @@ UnitTest1.cs
  System.Xml.XPath.XDocument.dll
  WindowsBase.dll
 <NUGET>/
+ microsoft.aspnetcore.authentication.jwtbearer/10.0.8/lib/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
  microsoft.aspnetcore.openapi/10.0.5/lib/net10.0/Microsoft.AspNetCore.OpenApi.dll
  microsoft.codecoverage/17.14.1/lib/net8.0/Microsoft.VisualStudio.CodeCoverage.Shim.dll
  microsoft.entityframeworkcore.abstractions/10.0.8/lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll
@@ -383,6 +384,12 @@ UnitTest1.cs
  microsoft.extensions.logging/10.0.8/lib/net10.0/Microsoft.Extensions.Logging.dll
  microsoft.extensions.options/10.0.8/lib/net10.0/Microsoft.Extensions.Options.dll
  microsoft.extensions.primitives/10.0.8/lib/net10.0/Microsoft.Extensions.Primitives.dll
+ microsoft.identitymodel.abstractions/8.18.0/lib/net10.0/Microsoft.IdentityModel.Abstractions.dll
+ microsoft.identitymodel.jsonwebtokens/8.18.0/lib/net10.0/Microsoft.IdentityModel.JsonWebTokens.dll
+ microsoft.identitymodel.logging/8.18.0/lib/net10.0/Microsoft.IdentityModel.Logging.dll
+ microsoft.identitymodel.protocols.openidconnect/8.0.1/lib/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+ microsoft.identitymodel.protocols/8.0.1/lib/net9.0/Microsoft.IdentityModel.Protocols.dll
+ microsoft.identitymodel.tokens/8.18.0/lib/net10.0/Microsoft.IdentityModel.Tokens.dll
  microsoft.openapi/2.0.0/lib/net8.0/Microsoft.OpenApi.dll
  microsoft.testplatform.testhost/17.14.1/lib/net8.0/
   Microsoft.TestPlatform.CommunicationUtilities.dll
@@ -396,6 +403,7 @@ UnitTest1.cs
  newtonsoft.json/13.0.3/lib/net6.0/Newtonsoft.Json.dll
  npgsql.entityframeworkcore.postgresql/10.0.1/lib/net10.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
  npgsql/10.0.2/lib/net10.0/Npgsql.dll
+ system.identitymodel.tokens.jwt/8.18.0/lib/net10.0/System.IdentityModel.Tokens.Jwt.dll
  xunit.abstractions/2.0.3/lib/netstandard2.0/xunit.abstractions.dll
  xunit.assert/2.9.3/lib/net6.0/xunit.assert.dll
  xunit.extensibility.core/2.9.3/lib/netstandard1.1/xunit.core.dll

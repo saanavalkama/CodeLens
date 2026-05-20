@@ -55,6 +55,14 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 
 [sourceFiles]
 Class1.cs
+Entities/
+ Auth/RefreshToken.cs
+ Repository.cs
+ User.cs
+Enums/
+ IndexingStatus.cs
+ UserTier.cs
+Exceptions/AppExceptions.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  CodeLens.Domain.AssemblyInfo.cs
