@@ -56,10 +56,26 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 [sourceFiles]
 Class1.cs
 Data/AppDbContext.cs
+Migrations/
+ 20260518062356_InitialSchema.cs
+ 20260518062356_InitialSchema.Designer.cs
+ 20260519081631_AddRefreshToken.cs
+ 20260519081631_AddRefreshToken.Designer.cs
+ AppDbContextModelSnapshot.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  CodeLens.Infrastructure.AssemblyInfo.cs
  CodeLens.Infrastructure.GlobalUsings.g.cs
+Options/
+ EncryptionOptions.cs
+ GitHubOptions.cs
+ JwtOptions.cs
+Repositories/
+ RefreshTokenRepository.cs
+ UserRepository.cs
+Services/
+ GitHubAuthService.cs
+ JwtService.cs
 
 [metadataReferences]
 ../
@@ -246,8 +262,13 @@ obj/Debug/net10.0/
  microsoft.extensions.logging/10.0.8/lib/net10.0/Microsoft.Extensions.Logging.dll
  microsoft.extensions.options/10.0.8/lib/net10.0/Microsoft.Extensions.Options.dll
  microsoft.extensions.primitives/10.0.8/lib/net10.0/Microsoft.Extensions.Primitives.dll
+ microsoft.identitymodel.abstractions/8.18.0/lib/net10.0/Microsoft.IdentityModel.Abstractions.dll
+ microsoft.identitymodel.jsonwebtokens/8.18.0/lib/net10.0/Microsoft.IdentityModel.JsonWebTokens.dll
+ microsoft.identitymodel.logging/8.18.0/lib/net10.0/Microsoft.IdentityModel.Logging.dll
+ microsoft.identitymodel.tokens/8.18.0/lib/net10.0/Microsoft.IdentityModel.Tokens.dll
  npgsql.entityframeworkcore.postgresql/10.0.1/lib/net10.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
  npgsql/10.0.2/lib/net10.0/Npgsql.dll
+ system.identitymodel.tokens.jwt/8.18.0/lib/net10.0/System.IdentityModel.Tokens.Jwt.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.NETCore.App.Ref/10.0.5/analyzers/dotnet/cs/

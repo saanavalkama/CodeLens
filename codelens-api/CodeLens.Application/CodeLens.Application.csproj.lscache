@@ -55,10 +55,29 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 
 [sourceFiles]
 Class1.cs
+DTOs/Auth/
+ AuthResponseDto.cs
+ TokenDto.cs
+DTOs/User/
+ GitHubTokenDto.cs
+ GitHubUserDto.cs
+ JwtDto.cs
+Interfaces/Auth/
+ IAuthService.cs
+ IGitHubAuthService.cs
+ IJwtService.cs
+ IRefreshTokenRepository.cs
+Interfaces/Users/
+ IUserRepository.cs
+ IUserService.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  CodeLens.Application.AssemblyInfo.cs
  CodeLens.Application.GlobalUsings.g.cs
+Services/
+ AuthService.cs
+ UserService.cs
+Utils/Hashers.cs
 
 [metadataReferences]
 ../CodeLens.Domain/obj/Debug/net10.0/ref/CodeLens.Domain.dll
