@@ -31,9 +31,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Dev", policy =>
+    {
+        policy
+            .WithOrigins(builder.Configuration["Frontend:Url"] ?? "")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+} );
+
 builder.Services.Configure<GitHubOptions>(builder.Configuration.GetSection("GitHub"));
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));
+builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection("Frontend"));
 
 builder.Services.AddHttpClient<IGitHubAuthService, GitHubAuthService>();
 
@@ -46,6 +59,7 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+app.UseCors("Dev");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
