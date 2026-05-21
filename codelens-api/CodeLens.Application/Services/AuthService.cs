@@ -4,7 +4,7 @@ using System.Text;
 using CodeLens.Application.DTOs.Auth;
 using CodeLens.Application.DTOs.User;
 using CodeLens.Application.Interfaces.Auth;
-using CodeLens.Application.Utils;
+using CodeLens.Application.Interfaces.Utils;
 using CodeLens.Domain.Entites.Auth;
 
 namespace CodeLens.Application.Services;
@@ -13,14 +13,17 @@ public class AuthService : IAuthService
 {
     private readonly IJwtService _jwtService;
     private readonly IRefreshTokenRepository _rtrepo;
+    private readonly IHashingService _hasher;
 
     public AuthService(
         IJwtService jwtService,
-        IRefreshTokenRepository rtrepo
+        IRefreshTokenRepository rtrepo,
+        IHashingService hasher
     )
     {
         _jwtService = jwtService;
         _rtrepo = rtrepo;
+        _hasher = hasher;
     }
 
     public async Task<AuthResponseDto>HandleGitHubCallbackAsync(JwtDto dto)
@@ -46,7 +49,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto>RefreshTokenAsync(string rt)
     {
-        var hash = Hashers.SHA256_Hasher(rt);
+        var hash = _hasher.SHA256_Hasher(rt);
 
         var existingToken = await _rtrepo.GetByTokenHashAsync(hash);
         if(existingToken == null)
@@ -92,7 +95,7 @@ public class AuthService : IAuthService
 
     public async Task LogoutAsync(string rt)
     {
-        var hash = Hashers.SHA256_Hasher(rt);
+        var hash = _hasher.SHA256_Hasher(rt);
         var existingToken = await _rtrepo.GetByTokenHashAsync(hash);
 
         if(existingToken != null)

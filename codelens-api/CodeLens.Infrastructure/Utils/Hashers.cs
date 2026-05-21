@@ -1,13 +1,23 @@
 using System.Security.Cryptography;
 using System.Text;
+using CodeLens.Application.Interfaces.Utils;
+using CodeLens.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace CodeLens.Application.Utils;
 
-public static class Hashers
+public class HashingService : IHashingService 
 {
-    public static string AES_Encrypt(string text, string key)
+    private readonly EncryptionOptions _options;
+    public HashingService(
+        IOptions<EncryptionOptions> options
+    )
     {
-        var keyBytes = SHA256.HashData(Encoding.UTF8.GetBytes(key));
+        _options = options.Value;
+    }
+    public string AES_Encrypt(string text)
+    {
+        var keyBytes = SHA256.HashData(Encoding.UTF8.GetBytes(_options.Key));
 
         using var aes = Aes.Create();
         aes.Key = keyBytes;
@@ -24,9 +34,9 @@ public static class Hashers
         return Convert.ToBase64String(result);
     }
 
-    public static string AES_decrypt(string cipher, string key)
+    public string AES_Decrypt(string cipher)
     {
-       var keyBytes = SHA256.HashData(Encoding.UTF8.GetBytes(key));
+       var keyBytes = SHA256.HashData(Encoding.UTF8.GetBytes(_options.Key));
        var fullBytes = Convert.FromBase64String(cipher);
 
        using var aes = Aes.Create();
@@ -43,7 +53,7 @@ public static class Hashers
 
     }
 
-    public static string SHA256_Hasher(string text)
+    public string SHA256_Hasher(string text)
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(text));
         return Convert.ToBase64String(bytes);

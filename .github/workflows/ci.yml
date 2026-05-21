@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  dotnet:
+    name: .NET Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore codelens-api/CodeLens.slnx
+
+      - name: Build
+        run: dotnet build codelens-api/CodeLens.slnx --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test codelens-api/CodeLens.slnx --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+  frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: codelens-web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: codelens-web
+
+      - name: Type check
+        run: npx tsc --noEmit
+        working-directory: codelens-web
+
+      - name: Test
+        run: npx vitest run --coverage
+        working-directory: codelens-web
+
+  python:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: |
+            codelens-ai/requirements.txt
+            codelens-ai/requirements-test.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+        working-directory: codelens-ai
+
+      - name: Test
+        run: pytest
+        working-directory: codelens-ai

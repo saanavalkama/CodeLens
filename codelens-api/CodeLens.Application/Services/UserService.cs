@@ -2,19 +2,24 @@ using System.Data.Common;
 using CodeLens.Application.DTOs;
 using CodeLens.Application.DTOs.User;
 using CodeLens.Application.Interfaces.Users;
+using CodeLens.Application.Interfaces.Utils;
 using CodeLens.Domain.Entites;
+using CodeLens.Domain.Enums;
+using CodeLens.Domain.Exceptions;
 
 namespace CodeLens.Application.Services;
 
 public class UserService : IUserService
 {
     private readonly IUserRepository _repo;
-
+    private readonly IHashingService _hasher;
     public UserService(
-        IUserRepository repo
+        IUserRepository repo,
+        IHashingService hasher
     )
     {
         _repo = repo;
+        _hasher = hasher;
     }
 
     public async Task<JwtDto> FindOrCreateAsync(GitHubUserDto dto)
@@ -31,8 +36,8 @@ public class UserService : IUserService
                 GitHubUsername = dto.Login,
                 Email = dto.Email,
                 AvatarUrl = dto.AvatarUrl,
-                GitHubAccessToken = dto.AccessToken,
-                GitHubRefreshToken = dto.RefreshToken,
+                GitHubAccessToken = _hasher.AES_Encrypt(dto.AccessToken),
+                GitHubRefreshToken = dto.RefreshToken != null ? _hasher.AES_Encrypt(dto.RefreshToken) : null,
                 TokenExpiresAt= dto.TokenExpiresAt
             };
 
@@ -50,8 +55,8 @@ public class UserService : IUserService
             existingUser.GitHubUsername = dto.Login;
             existingUser.Email = dto.Email;
             existingUser.AvatarUrl = dto.AvatarUrl;
-            existingUser.GitHubAccessToken = dto.AccessToken;
-            existingUser.GitHubRefreshToken = dto.RefreshToken;
+            existingUser.GitHubAccessToken = _hasher.AES_Encrypt(dto.AccessToken);
+            existingUser.GitHubRefreshToken = dto.RefreshToken != null ? _hasher.AES_Encrypt(dto.RefreshToken) : null;
             existingUser.TokenExpiresAt = dto.TokenExpiresAt;
             existingUser.UpdatedAt = DateTime.UtcNow;
 
@@ -63,5 +68,16 @@ public class UserService : IUserService
                 UserTier: savedUser.UserTier.ToString()
             );
         }
+    }
+
+    public async Task<MeResponseDto>Me(Guid id)
+    {
+        var user = await _repo.FindByIdAsync(id) ?? throw new  NotFoundException("User");
+
+        return new MeResponseDto(
+            Id:user.Id,
+            GithubUsername: user.GitHubUsername,
+            UserTier: user.UserTier.ToString()
+        );
     }
 }

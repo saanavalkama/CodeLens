@@ -62,6 +62,7 @@ DTOs/User/
  GitHubTokenDto.cs
  GitHubUserDto.cs
  JwtDto.cs
+ MeResponseDto.cs
 Interfaces/Auth/
  IAuthService.cs
  IGitHubAuthService.cs
@@ -70,6 +71,7 @@ Interfaces/Auth/
 Interfaces/Users/
  IUserRepository.cs
  IUserService.cs
+Interfaces/Utils/IHashingService.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  CodeLens.Application.AssemblyInfo.cs
@@ -77,7 +79,6 @@ obj/Debug/net10.0/
 Services/
  AuthService.cs
  UserService.cs
-Utils/Hashers.cs
 
 [metadataReferences]
 ../CodeLens.Domain/obj/Debug/net10.0/ref/CodeLens.Domain.dll

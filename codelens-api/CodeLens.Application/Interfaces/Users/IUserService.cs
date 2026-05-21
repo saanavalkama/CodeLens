@@ -7,4 +7,5 @@ namespace CodeLens.Application.Interfaces.Users;
 public interface IUserService
 {
     Task<JwtDto>FindOrCreateAsync(GitHubUserDto gitHubUserDto);
+    Task<MeResponseDto>Me(Guid Id);
 }

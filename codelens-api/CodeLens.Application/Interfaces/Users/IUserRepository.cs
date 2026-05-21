@@ -6,5 +6,7 @@ public interface IUserRepository
 {
     Task<User?>FindByGitHubIdAsync(long githubId);
     Task<User>CreateAsync(User user);
-    Task<User>UpdateAsync(User user); 
+    Task<User>UpdateAsync(User user);
+
+    Task<User?>FindByIdAsync(Guid id); 
 }

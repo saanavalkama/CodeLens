@@ -1,8 +1,9 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import RootLayout from '../components/RootLayout'
 import LandingPage from '../pages/LandingPage'
 import Login from '../features/auth/pages/Login'
 import CallbackPage from '../features/auth/pages/CallbackPage'
+import AppProtectedRoute from '../features/auth/components/AppProtectedRoute'
 
 export const router = createBrowserRouter([
   {
@@ -21,9 +22,12 @@ export const router = createBrowserRouter([
       },
       {
         path:'/app',
-        element:<p>welcome!</p>
+        element:<AppProtectedRoute/>,
+        children:[
+            {index:true, element:<Navigate to="dashboard" />},
+            {path:"dashboard", element:<p>helloworld</p> }
+        ]
       }
-
     ],
   },
 ])
