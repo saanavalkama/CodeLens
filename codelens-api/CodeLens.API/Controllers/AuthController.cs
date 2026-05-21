@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using CodeLens.Application.Interfaces.Auth;
+using CodeLens.Application.Interfaces.Users;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CodeLens.API.Controllers;
@@ -10,12 +12,15 @@ public class AuthController : ControllerBase
 {
 
     private readonly IAuthService _authService;
+    private readonly IUserService _userService;
 
     public AuthController(
-        IAuthService authService
+        IAuthService authService,
+        IUserService userService
     )
     {
         _authService = authService;
+        _userService = userService;
     }
 
     [HttpPost("refresh")]
@@ -46,5 +51,14 @@ public class AuthController : ControllerBase
         await _authService.LogoutAsync(rt);
         Response.Cookies.Delete("refresh_token");
         return Ok();
+    }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+       Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier),out var userId);
+       //freshest data for github username and user tier
+        var dto = await _userService.Me(userId);
+        return Ok(dto);
     }
 } 

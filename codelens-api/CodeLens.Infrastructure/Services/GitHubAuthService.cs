@@ -5,7 +5,7 @@ using CodeLens.Application.Interfaces.Auth;
 using Microsoft.Extensions.Options;
 using CodeLens.Infrastructure.Options; 
 
-namespace CodeLens.Infrastructure.Sevices;
+namespace CodeLens.Infrastructure.Services;
 
 public class GitHubAuthService : IGitHubAuthService
 {
@@ -47,19 +47,7 @@ public class GitHubAuthService : IGitHubAuthService
         var json = await res.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<JsonElement>(json);
 
-        var accessToken =  result.GetProperty("access_token").GetString()
-            ?? throw new Exception("No access token in GitHubResponse");
-
-        result.TryGetProperty("refresh_token", out var refreshToken);
-        result.TryGetProperty("expires_in",out var expiresIn);
-
-        return new GitHubTokenDto(
-            AccessToken: accessToken,
-            RefreshToken: refreshToken.GetString(),
-            ExpiresAt: expiresIn.ValueKind != JsonValueKind.Undefined
-            ? DateTime.UtcNow.AddSeconds(expiresIn.GetInt32())
-            : null
-        );
+       return ExtractValuesAndBuildDto(result);
 
     }
 
@@ -86,5 +74,42 @@ public class GitHubAuthService : IGitHubAuthService
             TokenExpiresAt: dto.ExpiresAt
         );
 
+    }
+
+    public async Task<GitHubTokenDto> GitHubRefreshAsync(string rt)
+    {
+        //once crypting is done it needs to go thru decrypt
+        var url = "https://github.com/login/oauth/access_token" + 
+            $"?client_id={_options.ClientId}" +
+            $"&client_secret={_options.ClientSecret}" +
+            $"&grant_type=refresh_token" + 
+            $"&refresh_token={rt}";
+        var request = new HttpRequestMessage(HttpMethod.Post,url);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        var res = await _httpClient.SendAsync(request);
+        res.EnsureSuccessStatusCode();
+
+        var json = await res.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<JsonElement>(json);
+
+       return ExtractValuesAndBuildDto(result);
+    }
+
+    private GitHubTokenDto ExtractValuesAndBuildDto(JsonElement result)
+    {
+        var accessToken = result.GetProperty("access_token").GetString()
+         ?? throw new Exception("No access token in GitHub refresh response");
+
+        result.TryGetProperty("refresh_token", out var refreshToken);
+        result.TryGetProperty("expires_in", out var expiresIn);
+
+        return new GitHubTokenDto(
+            AccessToken: accessToken,
+            RefreshToken: refreshToken.GetString(),
+            ExpiresAt: expiresIn.ValueKind != JsonValueKind.Undefined
+                ? DateTime.UtcNow.AddSeconds(expiresIn.GetInt32())
+                : null
+        );
     }
 }

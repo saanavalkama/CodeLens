@@ -1,12 +1,13 @@
 using System.Text;
 using CodeLens.Application.Interfaces.Auth;
 using CodeLens.Application.Interfaces.Users;
+using CodeLens.Application.Interfaces.Utils;
 using CodeLens.Application.Services;
+using CodeLens.Application.Utils;
 using CodeLens.Infrastructure.Data;
 using CodeLens.Infrastructure.Options;
 using CodeLens.Infrastructure.Repositories;
 using CodeLens.Infrastructure.Services;
-using CodeLens.Infrastructure.Sevices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -50,6 +51,7 @@ builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection("Fr
 
 builder.Services.AddHttpClient<IGitHubAuthService, GitHubAuthService>();
 
+builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();

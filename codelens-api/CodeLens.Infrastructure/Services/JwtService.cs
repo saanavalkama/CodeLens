@@ -5,6 +5,7 @@ using System.Text;
 using CodeLens.Application.DTOs.Auth;
 using CodeLens.Application.DTOs.User;
 using CodeLens.Application.Interfaces.Auth;
+using CodeLens.Application.Interfaces.Utils;
 using CodeLens.Application.Utils;
 using CodeLens.Infrastructure.Options;
 using Microsoft.Extensions.Options;
@@ -15,12 +16,15 @@ namespace CodeLens.Infrastructure.Services;
 public class JwtService : IJwtService
 {
     private readonly JwtOptions _options; 
+    private readonly IHashingService _hasher;
 
     public JwtService(
-        IOptions<JwtOptions> options
+        IOptions<JwtOptions> options,
+        IHashingService hasher
     )
     {
         _options = options.Value;
+        _hasher = hasher;
     }
 
     public string GenerateAccessToken(JwtDto dto)
@@ -58,7 +62,7 @@ public class JwtService : IJwtService
     {
         var accessToken = GenerateAccessToken(dto);
         var refreshToken = GenerateRefreshToken();
-        var hash = Hashers.SHA256_Hasher(refreshToken);
+        var hash = _hasher.SHA256_Hasher(refreshToken);
 
         return new TokenDto(
             AccessToken: accessToken,

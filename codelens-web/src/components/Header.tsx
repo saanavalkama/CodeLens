@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { useMe } from '../features/auth/hooks/authHooks'
 
 function GitHubIcon() {
   return (
@@ -18,6 +19,8 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  const {data:me} = useMe()
+
   return (
     <motion.header
       className={`site-header${scrolled ? ' site-header--scrolled' : ''}`}
@@ -29,11 +32,14 @@ export default function Header() {
         <a href="/" className="site-logo">
           Code<span>Lens</span>
         </a>
-
+        {
+          me ? <p>Signed in as {me.githubUsername}</p> :
+        
         <a href="/login" className="header-cta">
           <GitHubIcon />
           Sign in with GitHub
         </a>
+          }
       </div>
     </motion.header>
   )
