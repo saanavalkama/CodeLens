@@ -1,5 +1,3 @@
-import { interleavedGradientNoise } from "three/tsl"
-
 const apiBaseUrl = import.meta.env.VITE_API_URL
 
 interface Env{
