@@ -2,6 +2,8 @@ using CodeLens.Application.DTOs.User;
 using CodeLens.Application.Interfaces.Auth;
 using Microsoft.AspNetCore.Mvc;
 using CodeLens.Application.Interfaces.Users;
+using CodeLens.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace CodeLens.API.Controllers;
 
@@ -12,15 +14,19 @@ public class GitHubAuthContoller : ControllerBase
     private readonly IGitHubAuthService _githubService;
     private readonly IUserService _userService;
     private readonly IAuthService _authService;
+
+    private readonly FrontendOptions _options;
     public GitHubAuthContoller(
         IGitHubAuthService githubService,
         IUserService userService,
-        IAuthService authService
+        IAuthService authService,
+        IOptions<FrontendOptions> options
     )
     {
         _githubService = githubService;
         _userService = userService;
         _authService = authService;
+        _options = options.Value;
     }
 
     [HttpGet("login")]
@@ -52,7 +58,7 @@ public class GitHubAuthContoller : ControllerBase
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
 
-        return Ok(new { accessToken = tokens.AccessToken });
+        return Redirect($"{_options.Url}/auth/callback");
 
     }
 }
