@@ -73,9 +73,11 @@ Options/
  JwtOptions.cs
 Repositories/
  RefreshTokenRepository.cs
+ RepoRepository.cs
  UserRepository.cs
 Services/
  GitHubAuthService.cs
+ GitHubService.cs
  JwtService.cs
 Utils/Hashers.cs
 

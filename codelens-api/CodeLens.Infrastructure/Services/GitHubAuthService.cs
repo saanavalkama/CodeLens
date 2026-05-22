@@ -76,7 +76,7 @@ public class GitHubAuthService : IGitHubAuthService
 
     }
 
-    public async Task<GitHubTokenDto> GitHubRefreshAsync(string rt)
+        public async Task<GitHubTokenDto> GitHubRefreshAsync(string rt)
     {
         //once crypting is done it needs to go thru decrypt
         var url = "https://github.com/login/oauth/access_token" + 
@@ -95,7 +95,6 @@ public class GitHubAuthService : IGitHubAuthService
 
        return ExtractValuesAndBuildDto(result);
     }
-
     private GitHubTokenDto ExtractValuesAndBuildDto(JsonElement result)
     {
         var accessToken = result.GetProperty("access_token").GetString()
