@@ -25,11 +25,7 @@ public class GitHubController : ControllerBase
         var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if(id == null) throw new UnauthorizedException("No access to this endpoint");
         Guid.TryParse(id, out var parsedId);
-
-      
-
-        var dto = await _service.GetUserReposAsync(parsedId);
-
+        var dto = await _service.FetchAndReturnReposAsync(parsedId);
         return Ok(dto);
     }
 

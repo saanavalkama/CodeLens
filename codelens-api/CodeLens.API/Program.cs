@@ -1,5 +1,7 @@
 using System.Text;
 using CodeLens.Application.Interfaces.Auth;
+using CodeLens.Application.Interfaces.GitHub;
+using CodeLens.API.Middleware;
 using CodeLens.Application.Interfaces.Users;
 using CodeLens.Application.Interfaces.Utils;
 using CodeLens.Application.Services;
@@ -57,10 +59,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IRepoRepository,RepoRepository>();
+builder.Services.AddScoped<IGitHubService, GitHubService>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors("Dev");
 app.UseAuthentication();
 app.UseAuthorization();

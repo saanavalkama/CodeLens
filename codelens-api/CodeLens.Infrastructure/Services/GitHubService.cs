@@ -43,6 +43,7 @@ public class GitHubService : IGitHubService {
     public async Task<List<RepoDto>> FetchAndReturnReposAsync(Guid userId)
     {
         //fetch fresh tokens for user
+        //tighten logic, use expires at so no extra reqs are made
         var user = await _userRepo.FindByIdAsync(userId)
         ?? throw new NotFoundException("User");
         var token = user.GitHubRefreshToken ?? throw new NotFoundException("GitHub refresh token");

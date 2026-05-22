@@ -4,6 +4,7 @@ import LandingPage from '../pages/LandingPage'
 import Login from '../features/auth/pages/Login'
 import CallbackPage from '../features/auth/pages/CallbackPage'
 import AppProtectedRoute from '../features/auth/components/AppProtectedRoute'
+import DashBoard from '../pages/DashBoard'
 
 export const router = createBrowserRouter([
   {
@@ -25,7 +26,7 @@ export const router = createBrowserRouter([
         element:<AppProtectedRoute/>,
         children:[
             {index:true, element:<Navigate to="dashboard" />},
-            {path:"dashboard", element:<p>helloworld</p> }
+            {path:"dashboard", element:<DashBoard /> }
         ]
       }
     ],

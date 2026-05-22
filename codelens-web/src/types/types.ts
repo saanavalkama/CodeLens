@@ -3,3 +3,8 @@ export interface AuthResponse{
     githubUsername:string
     userTier: string
 }
+
+export interface RepoResponse{
+    id: string
+    name:string
+}

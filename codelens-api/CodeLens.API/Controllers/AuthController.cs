@@ -53,12 +53,14 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
-    [HttpGet("me")]
+  [HttpGet("me")]
     public async Task<IActionResult> Me()
     {
-       Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier),out var userId);
-       //freshest data for github username and user tier
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (id == null || !Guid.TryParse(id, out var userId))
+        return Unauthorized();
+
         var dto = await _userService.Me(userId);
         return Ok(dto);
-    }
+}
 } 
