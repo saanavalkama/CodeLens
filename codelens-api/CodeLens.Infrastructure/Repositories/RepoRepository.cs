@@ -47,4 +47,21 @@ public class RepoRepository : IRepoRepository
             .ToListAsync();
         return repos;
     }
+
+    public async Task<Repository?> GetRepoById(Guid id)
+    {
+        return await _context.Repositories
+            .FirstOrDefaultAsync(r => r.Id == id);
+    }
+
+    public async Task<Repository>UpdateAsync(Repository repo)
+    {
+        _context.Repositories.Update(repo);
+        await _context.SaveChangesAsync();
+        return repo;
+
+    }
+
+
+    
 }

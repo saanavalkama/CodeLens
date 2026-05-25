@@ -19,24 +19,33 @@ public class GitHubController : ControllerBase
       _service = service;  
     }
 
+    private Guid GetAndParseUserId()
+    {
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(id == null || Guid.TryParse(id, out var parsedId)) throw new UnauthorizedException("No access to this endpoint");
+        return parsedId;
+    }
+
     [HttpPost("repos/sync")]
     public async Task<IActionResult> SyncReposAsync()
     {
-        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if(id == null) throw new UnauthorizedException("No access to this endpoint");
-        Guid.TryParse(id, out var parsedId);
-        var dto = await _service.FetchAndReturnReposAsync(parsedId);
+        var dto = await _service.FetchAndReturnReposAsync(GetAndParseUserId());
         return Ok(dto);
     }
 
     [HttpGet("repos")]
     public async Task<IActionResult> GetRepos()
     {
-        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if(id == null) throw new UnauthorizedException("No access to this endpoint");
-        Guid.TryParse(id, out var parsedId);
-
-        var dto = await _service.GetUserReposAsync(parsedId);
+        var dto = await _service.GetUserReposAsync(GetAndParseUserId());
         return Ok(dto);
     }
+
+    [HttpPost("repos/{repoId}/index")]
+    public async Task <IActionResult>IndexRepo(Guid repoId)
+    {
+        var indexDto = await _service.IndexRepo(repoId, GetAndParseUserId());
+        return Ok(indexDto);
+    }
+
+
 }

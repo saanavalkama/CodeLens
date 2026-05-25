@@ -57,6 +57,7 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 Class1.cs
 Entities/
  Auth/RefreshToken.cs
+ File.cs
  Repository.cs
  User.cs
 Enums/
