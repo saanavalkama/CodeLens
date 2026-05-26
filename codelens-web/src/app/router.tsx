@@ -5,6 +5,7 @@ import Login from '../features/auth/pages/Login'
 import CallbackPage from '../features/auth/pages/CallbackPage'
 import AppProtectedRoute from '../features/auth/components/AppProtectedRoute'
 import DashBoard from '../pages/DashBoard'
+import WorkSpace from '../pages/Workspace'
 
 export const router = createBrowserRouter([
   {
@@ -26,7 +27,8 @@ export const router = createBrowserRouter([
         element:<AppProtectedRoute/>,
         children:[
             {index:true, element:<Navigate to="dashboard" />},
-            {path:"dashboard", element:<DashBoard /> }
+            {path:"dashboard", element:<DashBoard /> },
+            {path:"dashboard/:id", element:<WorkSpace />}
         ]
       }
     ],

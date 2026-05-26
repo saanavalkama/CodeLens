@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { useMe } from '../features/auth/hooks/authHooks'
+import { authService } from '../features/auth/services/authService'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../store/authStore'
 
 function GitHubIcon() {
   return (
@@ -13,6 +16,8 @@ function GitHubIcon() {
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -20,6 +25,12 @@ export default function Header() {
   }, [])
 
   const {data:me} = useMe()
+
+  const handleLogoout = async() => {
+    await authService.logout()
+    useAuthStore.getState().clearToken()
+    navigate("/")
+  }
 
   return (
     <motion.header
@@ -33,7 +44,10 @@ export default function Header() {
           Code<span>Lens</span>
         </a>
         {
-          me ? <p>Signed in as {me.githubUsername}</p> :
+          me ? <>
+            <p>Signed in as {me.githubUsername}</p>
+            <button onClick={handleLogoout}>Logout</button>
+            </> :
         
         <a href="/login" className="header-cta">
           <GitHubIcon />

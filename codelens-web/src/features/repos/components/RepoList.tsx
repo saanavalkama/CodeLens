@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { useFetchRepos, useRepos } from "../hooks/repoHooks"
 
 function FolderIcon() {
@@ -47,6 +48,7 @@ export default function RepoList() {
                             >
                                 <FolderIcon />
                                 <span className="truncate">{repo.name}</span>
+                                <Link to={`${repo.id}`}className="bg-zinc-900 px-2 py-2 hover:bg-zinc-700 ">Connect</Link>
                             </li>
                         ))}
                     </ul>

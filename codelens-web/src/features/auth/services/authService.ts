@@ -16,5 +16,9 @@ export const authService = {
     me:async(): Promise<AuthResponse> =>{
         const response = await api.get<AuthResponse>("/api/auth/me")
         return response.data
+    },
+
+    logout:async () => {
+       await api.post("/api/auth/logout")
     }
 }
