@@ -12,6 +12,7 @@ using CodeLens.Domain.Entites;
 using CodeLens.Domain.Enums;
 using CodeLens.Domain.Exceptions;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 
 namespace CodeLens.Infrastructure.Services;
 
@@ -28,6 +29,8 @@ public class GitHubService : IGitHubService {
 
     private readonly IFileRepository _fileRepo;
 
+    private readonly IConnectionMultiplexer _redis;
+
 
     public GitHubService(
         HttpClient client,
@@ -35,7 +38,8 @@ public class GitHubService : IGitHubService {
         IGitHubAuthService gitHubAuthService,
         IHashingService hasher,
         IRepoRepository repoRepo,
-        IFileRepository fileRepo
+        IFileRepository fileRepo,
+        IConnectionMultiplexer redis
     )
     {
         _client = client;
@@ -44,6 +48,7 @@ public class GitHubService : IGitHubService {
         _hasher = hasher;
         _repoRepo = repoRepo;
         _fileRepo = fileRepo;
+        _redis = redis;
         
     }
 
@@ -84,10 +89,12 @@ public class GitHubService : IGitHubService {
         return [..repos.Select(r => new RepoDto(Id:r.Id, Name:r.Name))];
     }
 
-    public async Task<IndexDto>IndexRepo(Guid repoId, Guid userId)
+    public async Task<IndexDto>IndexRepoAsync(Guid repoId, Guid userId)
     {
-        var repo = await _repoRepo.GetRepoById(repoId) 
+        var repo = await _repoRepo.GetRepoById(repoId)
             ?? throw new NotFoundException("Repository");
+
+        if(repo.UserId != userId) throw new ForbiddenException("Access denied");
 
         var tokens = await RefreshTokens(userId);
 
@@ -120,6 +127,12 @@ public class GitHubService : IGitHubService {
 
         await _fileRepo.UpsertFilesAsync(files);
 
+        var db = _redis.GetDatabase();
+        await db.StreamAddAsync("indexing-jobs", [
+            new NameValueEntry("repoId", repo.Id.ToString()),
+            new NameValueEntry("userId", userId.ToString())
+        ]);
+
         return new IndexDto(
             RepoId:repo.Id,
             IndexingStatus: repo.IndexingStatus.ToString(),
@@ -145,4 +158,20 @@ public class GitHubService : IGitHubService {
 
         return tokens;
     }
+
+    public async Task<IndexDto>GetFilesByRepoIdAsync(Guid repoId, Guid userId)
+    {
+        var repo = await _repoRepo.GetRepoById(repoId) ?? throw new NotFoundException("Repository");
+
+        if(repo.UserId != userId) throw new ForbiddenException("Access denied");
+
+        var files = await _fileRepo.GetFilesByRepoId(repoId);
+        return new IndexDto(
+            RepoId:repoId,
+            IndexingStatus:repo.IndexingStatus.ToString(),
+            Files: [..files.Select(f => new FileDto(f.Path,f.Type))]
+        );
+    }
+
+    
 }

@@ -51,11 +51,12 @@ public class AppDbContext: DbContext
         {
             entity.HasKey(f => f.Id);
             entity.HasIndex(f => new {f.RepositoryId, f.Path});
+            entity.HasIndex(f => f.RepositoryId);
             entity
                 .HasOne(f => f.Repository)
                 .WithMany()
                 .HasForeignKey(f => f.RepositoryId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);   
         });
 
     }

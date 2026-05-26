@@ -22,7 +22,7 @@ public class GitHubController : ControllerBase
     private Guid GetAndParseUserId()
     {
         var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if(id == null || Guid.TryParse(id, out var parsedId)) throw new UnauthorizedException("No access to this endpoint");
+        if(id == null || !Guid.TryParse(id, out var parsedId)) throw new UnauthorizedException("No access to this endpoint");
         return parsedId;
     }
 
@@ -43,7 +43,14 @@ public class GitHubController : ControllerBase
     [HttpPost("repos/{repoId}/index")]
     public async Task <IActionResult>IndexRepo(Guid repoId)
     {
-        var indexDto = await _service.IndexRepo(repoId, GetAndParseUserId());
+        var indexDto = await _service.IndexRepoAsync(repoId, GetAndParseUserId());
+        return Ok(indexDto);
+    }
+
+    [HttpGet("repos/{repoId}/files")]
+    public async Task<IActionResult>GetFiles(Guid repoId)
+    {
+        var indexDto = await _service.GetFilesByRepoIdAsync(repoId, GetAndParseUserId());
         return Ok(indexDto);
     }
 

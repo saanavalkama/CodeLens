@@ -43,4 +43,11 @@ public class FileRepository : IFileRepository
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task <List<RepositoryFile>> GetFilesByRepoId(Guid repoId) {
+        var files = await _context.RepositoryFiles
+            .Where(f => f.RepositoryId == repoId)
+            .ToListAsync();
+        return files;
+    }
 }

@@ -29,6 +29,7 @@ services:
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - Jwt__ExpiryDays=${JWT_EXPIRY_DAYS}
+      - Redis__ConnectionString=redis:6379
     depends_on:
       - postgres
       - redis
