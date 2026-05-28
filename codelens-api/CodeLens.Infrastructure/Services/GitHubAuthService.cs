@@ -3,7 +3,11 @@ using System.Text.Json;
 using CodeLens.Application.DTOs.User;
 using CodeLens.Application.Interfaces.Auth;
 using Microsoft.Extensions.Options;
-using CodeLens.Infrastructure.Options; 
+using CodeLens.Infrastructure.Options;
+using CodeLens.Infrastructure.Repositories;
+using CodeLens.Application.Interfaces.Users;
+using CodeLens.Domain.Exceptions;
+using CodeLens.Application.Interfaces.Utils;
 
 namespace CodeLens.Infrastructure.Services;
 
@@ -12,13 +16,23 @@ public class GitHubAuthService : IGitHubAuthService
     private readonly GitHubOptions _options;
     private readonly HttpClient _httpClient;
 
+    private readonly IUserRepository _userRepository;
+
+    private readonly IHashingService _hasher;
+
+
+
     public GitHubAuthService(
         IOptions<GitHubOptions> options,
-        HttpClient httpClient
+        HttpClient httpClient,
+        IUserRepository userRepository,
+        IHashingService hasher
     )
     {
         _options = options.Value;
         _httpClient = httpClient;
+        _userRepository = userRepository;
+        _hasher = hasher;
     }
 
     public string GetAuthorizationUrl()
@@ -94,6 +108,25 @@ public class GitHubAuthService : IGitHubAuthService
         var result = JsonSerializer.Deserialize<JsonElement>(json);
 
        return ExtractValuesAndBuildDto(result);
+    }
+
+    public async Task<bool>RefreshUserTokensAsync(Guid userId)
+    {
+        var user = await _userRepository.FindByIdAsync(userId);
+        if(user == null) throw new NotFoundException("User");
+
+        var token = user.GitHubRefreshToken;
+        if(token == null) return false;
+        var decrypted = _hasher.AES_Decrypt(token);
+        
+        var dto = await GitHubRefreshAsync(decrypted);
+
+        user.GitHubAccessToken = _hasher.AES_Encrypt(dto.AccessToken);
+        user.GitHubRefreshToken = dto.RefreshToken  != null? _hasher.AES_Encrypt(dto.RefreshToken) : null;
+        user.TokenExpiresAt = dto.ExpiresAt;
+
+        await _userRepository.UpdateAsync(user);
+        return true;
     }
     private GitHubTokenDto ExtractValuesAndBuildDto(JsonElement result)
     {

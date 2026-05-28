@@ -59,6 +59,7 @@ Controllers/
  AuthController.cs
  GitHubAuth.cs
  GitHubController.cs
+ InternalController.cs
 Middleware/ExceptionMiddleware.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs

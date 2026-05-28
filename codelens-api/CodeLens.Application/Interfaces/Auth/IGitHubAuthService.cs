@@ -7,4 +7,6 @@ public interface IGitHubAuthService
     Task<GitHubTokenDto> ExchangeCodeForTokenAsync(string code);
     Task<GitHubUserDto> GetUserAsync(GitHubTokenDto dto);
     Task<GitHubTokenDto> GitHubRefreshAsync(string rt);
+    Task<bool>RefreshUserTokensAsync(Guid userId);
+    
 }

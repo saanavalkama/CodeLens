@@ -30,6 +30,7 @@ services:
       - Jwt__Audience=${JWT_AUDIENCE}
       - Jwt__ExpiryDays=${JWT_EXPIRY_DAYS}
       - Redis__ConnectionString=redis:6379
+      - InternalApi__ApiKey=${INTERNAL_API_KEY}
     depends_on:
       - postgres
       - redis
@@ -41,6 +42,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     depends_on:
       - postgres
       - redis

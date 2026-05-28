@@ -1,7 +1,10 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, BigInteger, Text
+from sqlalchemy import Column, String, Boolean, DateTime, BigInteger, Text, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import relationship
+from pgvector.sqlalchemy import Vector
+from datetime import datetime
 
 class Base(DeclarativeBase):
     pass
@@ -29,10 +32,24 @@ class RepositoryFile(Base):
     __tablename__ = "RepositoryFiles"
 
     id = Column("Id",UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    repository_id = Column("RepositoryId", UUID(as_uuid=True))
+    repository_id = Column("RepositoryId", UUID(as_uuid=True), ForeignKey("Repositories.Id"))
     path = Column("Path", String)
     sha = Column("Sha", String)
     type = Column("Type", String)
     indexing_status = Column("IndexingStatus", String)
     indexing_error = Column("IndexingError", String, nullable=True)
     indexed_at = Column("IndexedAt", DateTime, nullable=True)
+    repository = relationship("Repository", lazy="raise")
+
+
+class FileChunk(Base):
+    __tablename__ = "FileChunks"
+
+    id = Column("Id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    repository_file_id = Column("RepositoryFileId", UUID(as_uuid=True), ForeignKey("RepositoryFiles.Id"))
+    content = Column("Content", Text)
+    embedding = Column("Embedding", Vector(384))  # 384 is all-MiniLM-L6-v2 dimensions
+    chunk_index = Column("ChunkIndex", Integer)
+    start_line = Column("StartLine", Integer)
+    end_line = Column("EndLine", Integer)
+    created_at = Column("CreatedAt", DateTime, default=datetime.utcnow)
