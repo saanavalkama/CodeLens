@@ -48,7 +48,7 @@ class FileChunk(Base):
     id = Column("Id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     repository_file_id = Column("RepositoryFileId", UUID(as_uuid=True), ForeignKey("RepositoryFiles.Id"))
     content = Column("Content", Text)
-    embedding = Column("Embedding", Vector(384))  # 384 is all-MiniLM-L6-v2 dimensions
+    embedding = Column("Embedding", Vector(768))
     chunk_index = Column("ChunkIndex", Integer)
     start_line = Column("StartLine", Integer)
     end_line = Column("EndLine", Integer)

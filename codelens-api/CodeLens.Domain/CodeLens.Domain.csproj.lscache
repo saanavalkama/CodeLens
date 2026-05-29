@@ -57,6 +57,9 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 Class1.cs
 Entities/
  Auth/RefreshToken.cs
+ Chat/
+  Conversation.cs
+  Message.cs
  File.cs
  Repository.cs
  User.cs

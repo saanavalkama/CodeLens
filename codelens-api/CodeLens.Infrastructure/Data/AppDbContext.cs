@@ -1,5 +1,6 @@
 using CodeLens.Domain.Entites;
 using CodeLens.Domain.Entites.Auth;
+using CodeLens.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeLens.Infrastructure.Data;
@@ -12,6 +13,10 @@ public class AppDbContext: DbContext
    public DbSet<RefreshToken>RefreshTokens {get;set;}
 
    public DbSet<RepositoryFile> RepositoryFiles {get;set;}
+
+   public DbSet<Conversation>Conversations {get;set;}
+
+   public DbSet<Message>Messages {get;set;}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,6 +62,24 @@ public class AppDbContext: DbContext
                 .WithMany()
                 .HasForeignKey(f => f.RepositoryId)
                 .OnDelete(DeleteBehavior.Cascade);   
+        });
+
+        modelBuilder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.HasIndex(c => c.UserId);
+            entity.HasIndex(c => c.RepositoryId);
+        });
+
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.HasIndex(m => m.ConversationId);
+            entity
+                .HasOne(m => m.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
     }

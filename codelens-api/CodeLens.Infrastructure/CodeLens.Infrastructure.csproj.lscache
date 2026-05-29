@@ -65,6 +65,8 @@ Migrations/
  20260525070754_AddRepositoryFiles.Designer.cs
  20260525125823_Fixes.cs
  20260525125823_Fixes.Designer.cs
+ 20260529064558_AddConversations.cs
+ 20260529064558_AddConversations.Designer.cs
  AppDbContextModelSnapshot.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs

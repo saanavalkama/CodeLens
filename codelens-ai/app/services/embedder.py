@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 from app.services.chunking import Chunk
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer("microsoft/codebert-base")
 
 def embed_chunks(chunks: list[Chunk]) -> list[tuple[Chunk, list[float]]]:
     texts = [chunk.content for chunk in chunks]
