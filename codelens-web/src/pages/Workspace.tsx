@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom"
-import { useFiles, useFilesWithAutoConnect } from "../features/repos/hooks/repoHooks"
+import { useFilesWithAutoConnect } from "../features/repos/hooks/repoHooks"
 import FileStructure from "../features/repos/components/FileStructure"
 
 export default function WorkSpace(){
