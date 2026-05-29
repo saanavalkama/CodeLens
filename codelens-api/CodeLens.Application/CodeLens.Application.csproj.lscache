@@ -58,6 +58,10 @@ Class1.cs
 DTOs/Auth/
  AuthResponseDto.cs
  TokenDto.cs
+DTOs/GitHub/
+ FileDto.cs
+ IndexDto.cs
+ RepoDto.cs
 DTOs/User/
  GitHubTokenDto.cs
  GitHubUserDto.cs
@@ -68,6 +72,10 @@ Interfaces/Auth/
  IGitHubAuthService.cs
  IJwtService.cs
  IRefreshTokenRepository.cs
+Interfaces/GitHub/
+ IFileRepository.cs
+ IGithubService.cs
+ IRepoRepository.cs
 Interfaces/Users/
  IUserRepository.cs
  IUserService.cs

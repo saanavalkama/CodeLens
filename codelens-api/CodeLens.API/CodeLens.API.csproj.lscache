@@ -58,6 +58,8 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 Controllers/
  AuthController.cs
  GitHubAuth.cs
+ GitHubController.cs
+ InternalController.cs
 Middleware/ExceptionMiddleware.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
@@ -394,7 +396,10 @@ Program.cs
  microsoft.openapi/2.0.0/lib/net8.0/Microsoft.OpenApi.dll
  npgsql.entityframeworkcore.postgresql/10.0.1/lib/net10.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
  npgsql/10.0.2/lib/net10.0/Npgsql.dll
+ pipelines.sockets.unofficial/2.2.16/lib/net9.0/Pipelines.Sockets.Unofficial.dll
+ stackexchange.redis/2.13.1/lib/net10.0/StackExchange.Redis.dll
  system.identitymodel.tokens.jwt/8.18.0/lib/net10.0/System.IdentityModel.Tokens.Jwt.dll
+ system.io.hashing/10.0.2/lib/net10.0/System.IO.Hashing.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.AspNetCore.App.Ref/10.0.5/analyzers/dotnet/cs/

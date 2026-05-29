@@ -31,5 +31,7 @@ public class Repository
 
     public User User {get;set;} = null!;
 
+    public bool IsTruncated {get;set;} = false;
+
 
 }

@@ -24,6 +24,13 @@ api.interceptors.response.use(
         if (error.response?.status !== 401 || original._retry) {
             return Promise.reject(error)
         }
+
+        // Refresh token itself is expired — log out immediately
+        if (original.url === "/api/auth/refresh") {
+            useAuthStore.getState().clearToken()
+            return Promise.reject(error)
+        }
+
         original._retry = true
 
         if (!refreshing) {
@@ -32,6 +39,10 @@ api.interceptors.response.use(
                     const newToken: string = res.data.accessToken
                     useAuthStore.getState().setToken(newToken)
                     return newToken
+                })
+                .catch((refreshError) => {
+                    useAuthStore.getState().clearToken()
+                    return Promise.reject(refreshError)
                 })
                 .finally(() => { refreshing = null })
         }

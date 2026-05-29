@@ -61,6 +61,12 @@ Migrations/
  20260518062356_InitialSchema.Designer.cs
  20260519081631_AddRefreshToken.cs
  20260519081631_AddRefreshToken.Designer.cs
+ 20260525070754_AddRepositoryFiles.cs
+ 20260525070754_AddRepositoryFiles.Designer.cs
+ 20260525125823_Fixes.cs
+ 20260525125823_Fixes.Designer.cs
+ 20260529064558_AddConversations.cs
+ 20260529064558_AddConversations.Designer.cs
  AppDbContextModelSnapshot.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
@@ -72,10 +78,13 @@ Options/
  GitHubOptions.cs
  JwtOptions.cs
 Repositories/
+ FileRepository.cs
  RefreshTokenRepository.cs
+ RepoRepository.cs
  UserRepository.cs
 Services/
  GitHubAuthService.cs
+ GitHubService.cs
  JwtService.cs
 Utils/Hashers.cs
 
@@ -270,7 +279,10 @@ Utils/Hashers.cs
  microsoft.identitymodel.tokens/8.18.0/lib/net10.0/Microsoft.IdentityModel.Tokens.dll
  npgsql.entityframeworkcore.postgresql/10.0.1/lib/net10.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
  npgsql/10.0.2/lib/net10.0/Npgsql.dll
+ pipelines.sockets.unofficial/2.2.16/lib/net9.0/Pipelines.Sockets.Unofficial.dll
+ stackexchange.redis/2.13.1/lib/net10.0/StackExchange.Redis.dll
  system.identitymodel.tokens.jwt/8.18.0/lib/net10.0/System.IdentityModel.Tokens.Jwt.dll
+ system.io.hashing/10.0.2/lib/net10.0/System.IO.Hashing.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.NETCore.App.Ref/10.0.5/analyzers/dotnet/cs/
