@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
+using CodeLens.Application.Interfaces.Search;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,11 @@ builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("
 builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection("Frontend"));
 
 builder.Services.AddHttpClient<IGitHubAuthService, GitHubAuthService>();
+builder.Services.AddHttpClient<IGitHubService, GitHubService>();
+builder.Services.AddHttpClient<IFastApiClient, FastAPIClient>(client=>
+{
+    client.BaseAddress = new Uri(builder.Configuration["FastApi:BaseUrl"]!);
+});
 
 builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -65,7 +71,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IRepoRepository,RepoRepository>();
-builder.Services.AddScoped<IGitHubService, GitHubService>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddControllers();
 

@@ -6,7 +6,7 @@ _model = None
 def _get_model() -> SentenceTransformer:
     global _model
     if _model is None:
-        _model = SentenceTransformer("microsoft/codebert-base")
+        _model = SentenceTransformer("flax-sentence-embeddings/st-codesearch-distilroberta-base")
     return _model
 
 def embed_chunks(chunks: list[Chunk]) -> list[tuple[Chunk, list[float]]]:

@@ -65,6 +65,7 @@ Entities/
  User.cs
 Enums/
  IndexingStatus.cs
+ Role.cs
  UserTier.cs
 Exceptions/AppExceptions.cs
 obj/Debug/net10.0/
