@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import asyncio
 from app.worker.worker import start_worker
+from app.routers import search
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -14,6 +15,8 @@ async def lifespan(app:FastAPI):
     pass
 
 app = FastAPI(title ="CodeLens AI service", lifespan=lifespan)
+
+app.include_router(search.router)
 
 @app.get("/health")
 def health():

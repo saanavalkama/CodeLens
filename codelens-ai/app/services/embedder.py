@@ -13,3 +13,6 @@ def embed_chunks(chunks: list[Chunk]) -> list[tuple[Chunk, list[float]]]:
     texts = [chunk.content for chunk in chunks]
     embeddings = _get_model().encode(texts, show_progress_bar=False)
     return list(zip(chunks, embeddings.tolist()))
+
+def embed_query(query:str) -> list[float]:
+    return _get_model().encode(query, show_progress_bar=False).tolist()

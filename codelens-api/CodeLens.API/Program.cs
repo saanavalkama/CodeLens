@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using CodeLens.Application.Interfaces.Search;
+using CodeLens.Application.Interfaces.Chat;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +63,9 @@ builder.Services.AddHttpClient<IGitHubService, GitHubService>();
 builder.Services.AddHttpClient<IFastApiClient, FastAPIClient>(client=>
 {
     client.BaseAddress = new Uri(builder.Configuration["FastApi:BaseUrl"]!);
+    client.DefaultRequestHeaders.Add(
+        "X-Internal-Api-Key", 
+        builder.Configuration["FastApi:InternalApiKey"]!);
 });
 
 builder.Services.AddScoped<IHashingService, HashingService>();
@@ -72,6 +76,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IRepoRepository,RepoRepository>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
