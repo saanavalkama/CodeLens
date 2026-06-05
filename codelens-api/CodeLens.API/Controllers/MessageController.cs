@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CodeLens.Application.DTOs.Chat;
 using CodeLens.Application.DTOs.Search;
 using CodeLens.Application.Interfaces.Search;
 using CodeLens.Domain.Exceptions;
@@ -9,12 +10,12 @@ namespace CodeLens.API.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("search")]
-public class SearchController : ControllerBase
+[Route("api/chat")]
+public class MessageController : ControllerBase
 {
-    private readonly ISearchService _service;
-    public SearchController(
-        ISearchService service
+    private readonly IMessageService _service;
+    public MessageController(
+        IMessageService service
     )
     {
         _service = service;
@@ -32,16 +33,23 @@ public class SearchController : ControllerBase
 
 
     public async Task<IActionResult>Search(
-        Guid repoId, 
-        Guid conversationId, 
-        [FromBody ]string message,
+        Guid repoId,
+        Guid conversationId,
+        [FromBody] SendMessageRequestDto request,
         CancellationToken ct
         )
-    
+
     {
-        var dto = await _service.SearchAsync(GetAndParseUserId(), repoId, conversationId, message,ct);
+        var dto = await _service.SearchAsync(GetAndParseUserId(), repoId, conversationId, request.Message,ct);
         return Ok(dto);
 
+    }
+
+    [HttpGet("{repoId}/{conversationId}")]
+    public async Task <IActionResult>GetMessages(Guid repoId, Guid conversationId)
+    {
+        var dto = await _service.GetNMessagesAync(GetAndParseUserId(),repoId,conversationId);
+        return Ok(dto);
     }
 
 

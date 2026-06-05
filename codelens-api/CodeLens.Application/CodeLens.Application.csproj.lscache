@@ -58,21 +58,23 @@ Class1.cs
 DTOs/Auth/
  AuthResponseDto.cs
  TokenDto.cs
-DTOs/
- Chat/MessageDto.cs
- GitHub/
-  FileDto.cs
-  IndexDto.cs
-  RepoDto.cs
- Search/
-  SearchChunkDto.cs
-  SearchRequestDto.cs
-  SearchResponseDto.cs
- User/
-  GitHubTokenDto.cs
-  GitHubUserDto.cs
-  JwtDto.cs
-  MeResponseDto.cs
+DTOs/Chat/
+ ConversationResponseDto.cs
+ MessageDto.cs
+ SendMessageRequestDto.cs
+DTOs/GitHub/
+ FileDto.cs
+ IndexDto.cs
+ RepoDto.cs
+DTOs/Search/
+ SearchChunkDto.cs
+ SearchRequestDto.cs
+ SearchResponseDto.cs
+DTOs/User/
+ GitHubTokenDto.cs
+ GitHubUserDto.cs
+ JwtDto.cs
+ MeResponseDto.cs
 Interfaces/Auth/
  IAuthService.cs
  IGitHubAuthService.cs
@@ -80,6 +82,7 @@ Interfaces/Auth/
  IRefreshTokenRepository.cs
 Interfaces/Chat/
  IConversationRepository.cs
+ IConversationService.cs
  IMessageRepository.cs
 Interfaces/GitHub/
  IFileRepository.cs
@@ -87,7 +90,7 @@ Interfaces/GitHub/
  IRepoRepository.cs
 Interfaces/Search/
  IFastAPIClient.cs
- SearchService.cs
+ IMessageService.cs
 Interfaces/Users/
  IUserRepository.cs
  IUserService.cs
@@ -98,7 +101,8 @@ obj/Debug/net10.0/
  CodeLens.Application.GlobalUsings.g.cs
 Services/
  AuthService.cs
- SearchService.cs
+ ConversationService.cs
+ MessageService.cs
  UserService.cs
 
 [metadataReferences]

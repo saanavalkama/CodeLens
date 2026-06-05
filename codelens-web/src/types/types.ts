@@ -1,3 +1,5 @@
+import { exp } from "three/src/nodes/math/MathNode.js"
+
 export interface AuthResponse{
     id:string
     githubUsername:string
@@ -24,4 +26,21 @@ export interface FileNode {
   id: string;
   name: string;
   children?: FileNode[];
+}
+
+export interface ConversationResponse{
+   id: string,
+   userId:string,
+   repoId:string, 
+   title:string,
+   cratedAt:string 
+}
+
+export interface MessageResponse{
+    answer:string
+}
+
+export interface Message{
+    role:string,
+    content:string
 }

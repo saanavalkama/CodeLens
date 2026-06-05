@@ -64,8 +64,8 @@ builder.Services.AddHttpClient<IFastApiClient, FastAPIClient>(client=>
 {
     client.BaseAddress = new Uri(builder.Configuration["FastApi:BaseUrl"]!);
     client.DefaultRequestHeaders.Add(
-        "X-Internal-Api-Key", 
-        builder.Configuration["FastApi:InternalApiKey"]!);
+        "X-Internal-Api-Key",
+        builder.Configuration["InternalApi:ApiKey"]!);
 });
 
 builder.Services.AddScoped<IHashingService, HashingService>();
@@ -78,7 +78,8 @@ builder.Services.AddScoped<IRepoRepository,RepoRepository>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-builder.Services.AddScoped<ISearchService, SearchService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
