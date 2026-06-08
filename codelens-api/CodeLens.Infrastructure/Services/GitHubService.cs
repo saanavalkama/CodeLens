@@ -127,6 +127,9 @@ public class GitHubService : IGitHubService {
 
         await _fileRepo.UpsertFilesAsync(files);
 
+        repo.IndexingStatus = IndexingStatus.Indexing;
+        await _repoRepo.UpdateAsync(repo);
+
         var db = _redis.GetDatabase();
         await db.StreamAddAsync("indexing-jobs", [
             new NameValueEntry("repoId", repo.Id.ToString()),

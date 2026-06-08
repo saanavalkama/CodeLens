@@ -36,6 +36,12 @@ async def process_job(repo_id: str, user_id: str):
             print(f"No user or files found for repo {repo_id}")
             return
 
+        repo_result = await db.execute(select(Repository).where(Repository.id == repo_id))
+        repo = repo_result.scalar_one_or_none()
+        if repo:
+            repo.indexing_status = "Indexing"
+            await db.commit()
+
         print(f"Indexing {len(files)} files for repo {repo_id}")
 
         githubusername = user.github_username
@@ -63,10 +69,12 @@ async def process_job(repo_id: str, user_id: str):
 
                 if status != FetchStatus.OK or content is None:
                     print(f"Retry failed for {file.path}")
+                    file.indexing_status = "Failed"
                     continue
 
             if status == FetchStatus.ERROR or content is None:
                 print(f"Skipping {file.path}")
+                file.indexing_status = "Failed"
                 continue
 
             chunks = chunk_file(content, file.path)
@@ -83,6 +91,10 @@ async def process_job(repo_id: str, user_id: str):
                 )
                 db.add(db_chunk)
 
+            file.indexing_status = "Completed"
+
+        if repo:
+            repo.indexing_status = "Completed"
         await db.commit()
         print(f"files processed for {repo_id}")
 
@@ -95,6 +107,12 @@ async def _process_entries(r, entries):
             await r.xack(STREAM_NAME, GROUP_NAME, entry_id)
         except Exception as e:
             print(f"Failed to process job {entry_id}: {e}")
+            async with AsyncSessionLocal() as db:
+                repo_result = await db.execute(select(Repository).where(Repository.id == repo_id))
+                repo = repo_result.scalar_one_or_none()
+                if repo:
+                    repo.indexing_status = "Failed"
+                    await db.commit()
 
 
 async def start_worker():

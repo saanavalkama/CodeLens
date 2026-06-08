@@ -27,6 +27,7 @@ class Repository(Base):
     full_name = Column("FullName", String)
     default_branch = Column("DefaultBranch", String)
     user_id = Column("UserId", UUID(as_uuid=True))
+    indexing_status = Column("IndexingStatus", String)
 
 class RepositoryFile(Base):
     __tablename__ = "RepositoryFiles"
