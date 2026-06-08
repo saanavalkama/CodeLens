@@ -1,3 +1,5 @@
+using CodeLens.Domain.Enums;
+
 namespace CodeLens.Domain.Entities;
 
 public class Message

@@ -57,9 +57,11 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 [sourceFiles]
 Controllers/
  AuthController.cs
+ ConversationController.cs
  GitHubAuth.cs
  GitHubController.cs
  InternalController.cs
+ MessageController.cs
 Middleware/ExceptionMiddleware.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs

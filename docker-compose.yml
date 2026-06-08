@@ -31,9 +31,11 @@ services:
       - Jwt__ExpiryDays=${JWT_EXPIRY_DAYS}
       - Redis__ConnectionString=redis:6379
       - InternalApi__ApiKey=${INTERNAL_API_KEY}
+      - FastApi__BaseUrl=http://codelens-ai:8000
     depends_on:
       - postgres
       - redis
+      - codelens-ai
 
   codelens-ai:
     build: ./codelens-ai

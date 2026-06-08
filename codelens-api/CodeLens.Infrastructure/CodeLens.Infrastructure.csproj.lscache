@@ -78,11 +78,14 @@ Options/
  GitHubOptions.cs
  JwtOptions.cs
 Repositories/
+ ConversationRepository.cs
  FileRepository.cs
+ MessageRepository.cs
  RefreshTokenRepository.cs
  RepoRepository.cs
  UserRepository.cs
 Services/
+ FastAPIClient.cs
  GitHubAuthService.cs
  GitHubService.cs
  JwtService.cs
