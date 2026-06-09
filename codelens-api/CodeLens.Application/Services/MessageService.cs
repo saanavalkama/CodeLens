@@ -34,7 +34,8 @@ public class MessageService : IMessageService
        var requestDto = new SearchRequestDto(
         Query: message,
         RepoId: repoId,
-        History: history.Select(m => new MessageDto(m.Role.ToString(), m.Content)).ToList()
+        History: history.Select(m => new MessageDto(m.Role.ToString(), m.Content)).ToList(),
+        UserId: userId
        );
 
         var userMessage = new Message

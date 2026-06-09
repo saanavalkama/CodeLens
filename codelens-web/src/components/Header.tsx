@@ -46,6 +46,7 @@ export default function Header() {
         {
           me ? <>
             <p>Signed in as {me.githubUsername}</p>
+            <a href="/app/settings" className="text-white/60 hover:text-white text-sm transition-colors">Settings</a>
             <button onClick={handleLogoout}>Logout</button>
             </> :
         

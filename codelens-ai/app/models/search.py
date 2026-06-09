@@ -8,6 +8,7 @@ class SearchRequest(BaseModel):
     query: str
     repoId:str
     history: list[MessageDto] = []
+    userId:str
 
 class SearchResponse(BaseModel):
     answer: str

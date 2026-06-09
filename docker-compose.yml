@@ -31,6 +31,7 @@ services:
       - Jwt__ExpiryDays=${JWT_EXPIRY_DAYS}
       - Redis__ConnectionString=redis:6379
       - InternalApi__ApiKey=${INTERNAL_API_KEY}
+      - Encryption__Key=${ENCRYPTION_KEY}
       - FastApi__BaseUrl=http://codelens-ai:8000
     depends_on:
       - postgres
@@ -46,6 +47,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - INTERNAL_API_KEY=${INTERNAL_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AES_KEY=${ENCRYPTION_KEY}
     depends_on:
       - postgres
       - redis

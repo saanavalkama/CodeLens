@@ -130,6 +130,9 @@ public class GitHubAuthService : IGitHubAuthService
     }
     private GitHubTokenDto ExtractValuesAndBuildDto(JsonElement result)
     {
+        if (result.TryGetProperty("error", out var error))
+            throw new Exception($"GitHub token request failed: {error.GetString()}");
+
         var accessToken = result.GetProperty("access_token").GetString()
          ?? throw new Exception("No access token in GitHub refresh response");
 

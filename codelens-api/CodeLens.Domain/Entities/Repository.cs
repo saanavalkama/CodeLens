@@ -17,7 +17,7 @@ public class Repository
     public bool IsPrivate {get;set;}
     public string DefaultBranch {get;set;} = string.Empty;
 
-    public IndexingStatus IndexingStatus {get;set;}
+    public IndexingStatus IndexingStatus {get;set;} = IndexingStatus.Pending;
 
     public DateTime? LastIndexedAt {get;set;}
 
@@ -32,6 +32,10 @@ public class Repository
     public User User {get;set;} = null!;
 
     public bool IsTruncated {get;set;} = false;
+
+    public int TotalFiles {get;set;}
+
+    public int IndexedFiles {get;set;}
 
 
 }

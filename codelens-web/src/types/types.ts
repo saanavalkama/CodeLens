@@ -1,5 +1,3 @@
-import { exp } from "three/src/nodes/math/MathNode.js"
-
 export interface AuthResponse{
     id:string
     githubUsername:string
@@ -43,4 +41,12 @@ export interface MessageResponse{
 export interface Message{
     role:string,
     content:string
+}
+
+export interface RepoStatus {
+    id: string
+    status: string
+    totalFiles: number
+    indexedFiles: number
+    percentComplete: number
 }

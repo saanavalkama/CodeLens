@@ -19,6 +19,7 @@ class User(Base):
     github_access_token = Column("GitHubAccessToken", String)
     github_refresh_token = Column("GitHubRefreshToken", String, nullable=True)
     token_expires_at = Column("TokenExpiresAt", DateTime, nullable=True)
+    encrypted_openai_key = Column("EncryptedOpenAIKey", String, nullable=True)
 
 class Repository(Base):
     __tablename__ = "Repositories"
@@ -27,7 +28,7 @@ class Repository(Base):
     full_name = Column("FullName", String)
     default_branch = Column("DefaultBranch", String)
     user_id = Column("UserId", UUID(as_uuid=True))
-    indexing_status = Column("IndexingStatus", String)
+    indexing_status = Column("IndexingStatus", Integer)
 
 class RepositoryFile(Base):
     __tablename__ = "RepositoryFiles"
@@ -37,7 +38,7 @@ class RepositoryFile(Base):
     path = Column("Path", String)
     sha = Column("Sha", String)
     type = Column("Type", String)
-    indexing_status = Column("IndexingStatus", String)
+    indexing_status = Column("IndexingStatus", Integer)
     indexing_error = Column("IndexingError", String, nullable=True)
     indexed_at = Column("IndexedAt", DateTime, nullable=True)
     repository = relationship("Repository", lazy="raise")

@@ -54,5 +54,11 @@ public class GitHubController : ControllerBase
         return Ok(indexDto);
     }
 
+    [HttpGet("{repoId:guid}/status")]
+    public async Task<IActionResult> GetStatusAsync(Guid repoId)
+    {
+        var dto = await _service.GetRepoStatusAsync(GetAndParseUserId(), repoId);
+        return Ok(dto);
+    }
 
 }
