@@ -9,4 +9,5 @@ public interface IUserRepository
     Task<User>UpdateAsync(User user);
 
     Task<User?>FindByIdAsync(Guid id); 
+
 }

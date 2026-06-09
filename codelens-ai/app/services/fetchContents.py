@@ -21,8 +21,8 @@ async def fetch_contents(token:str, username:str,repo:str, file_path:str)->tuple
             response.raise_for_status()
             data = response.json()
 
-            if data.get("type") != "file":
-                return None
+            if isinstance(data, list) or data.get("type") != "file":
+                return FetchStatus.ERROR, None
 
             content = base64.b64decode(data["content"]).decode("utf-8")
             return FetchStatus.OK, content

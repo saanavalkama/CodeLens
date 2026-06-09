@@ -28,4 +28,6 @@ public class User
     public ICollection<Repository> Repositories {get;set;} = new List<Repository>();
 
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
+    public string EncryptedOpenAIKey {get;set;} = string.Empty;
 }

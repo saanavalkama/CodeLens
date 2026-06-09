@@ -80,4 +80,21 @@ public class UserService : IUserService
             UserTier: user.UserTier.ToString()
         );
     }
+
+    public async Task CreateOrUpdateKeyAsync(Guid userId, string key)
+    {
+        var user = await _repo.FindByIdAsync(userId)
+            ?? throw new NotFoundException("User");
+
+        user.EncryptedOpenAIKey = _hasher.AES_Encrypt(key);
+        await _repo.UpdateAsync(user);
+        
+    }
+
+    public async Task <bool> KeyStatusAsync(Guid userId)
+    {
+        var user = await _repo.FindByIdAsync(userId) 
+            ?? throw new NotFoundException("User");
+        return !string.IsNullOrEmpty(user.EncryptedOpenAIKey);
+    }
 }

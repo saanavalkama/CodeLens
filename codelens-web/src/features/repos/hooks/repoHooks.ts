@@ -30,6 +30,7 @@ export const useConnectRepo = () => {
         mutationFn:(repoId:string)=>repoServices.connectRepo(repoId),
         onSuccess:(data,repoId) => {
             qc.setQueryData(['files',repoId],data)
+            qc.invalidateQueries({queryKey:['indexing-status', repoId]})
         },
     })
 }
@@ -43,23 +44,40 @@ export const useFiles = (repoId:string) => {
     })
 }
 
-export const useFilesWithAutoConnect = (repoId: string) => {
-  const filesQuery = useFiles(repoId);
+export const useIndexingStatus = (repoId: string) => {
+    const query = useQuery({
+        queryKey: ['indexing-status', repoId],
+        queryFn: () => repoServices.getStatus(repoId),
+        enabled: !!repoId,
+        staleTime: 0,
+    })
+
+    useEffect(() => {
+        if (!repoId) return
+        const status = query.data?.status
+        if (status === 'Completed' || status === 'Failed') return
+
+        const id = setInterval(() => {
+            query.refetch()
+        }, 2000)
+
+        return () => clearInterval(id)
+    }, [repoId, query.data?.status])
+
+    return query
+}
+
+export const useAutoIndexRepo = (repoId: string) => {
   const connectRepo = useConnectRepo();
 
   useEffect(() => {
-    if (
-      filesQuery.status === "success" &&
-      filesQuery.data?.files.length === 0 &&
-      connectRepo.status === "idle"
-    ) {
-      connectRepo.mutate(repoId);
-    }
-  }, [filesQuery.status, filesQuery.data, repoId]);
+    connectRepo.mutate(repoId);
+  }, [repoId]);
 
   return {
-    ...filesQuery,
-    isConnecting: connectRepo.status === "pending",
-    isConnectError: connectRepo.status === "error"
+    data: connectRepo.data,
+    isPending: connectRepo.isPending,
+    isError: connectRepo.isError,
+    indexingStatus: connectRepo.data?.indexingStatus
   };
 };

@@ -1,5 +1,5 @@
 import { api } from "../../../lib/api";
-import type { ConnectResponse, RepoResponse } from "../../../types/types";
+import type { ConnectResponse, RepoResponse, RepoStatus } from "../../../types/types";
 
 const baseUrl = `/api/github`
 
@@ -23,7 +23,11 @@ export const repoServices = {
     getFiles: async(repoId:string):Promise<ConnectResponse> => {
         const response = await api.get<ConnectResponse>(`${baseUrl}/repos/${repoId}/files`)
         return response.data
-    }
+    },
 
+    getStatus: async(repoId:string):Promise<RepoStatus> => {
+        const response = await api.get<RepoStatus>(`${baseUrl}/${repoId}/status`)
+        return response.data
+    }
 
 }

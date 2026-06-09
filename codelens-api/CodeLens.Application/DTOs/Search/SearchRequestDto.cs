@@ -5,5 +5,6 @@ namespace CodeLens.Application.DTOs.Search;
 public record SearchRequestDto(
     string Query,
     Guid RepoId,
-    List<MessageDto> History
+    List<MessageDto> History,
+    Guid UserId
 );

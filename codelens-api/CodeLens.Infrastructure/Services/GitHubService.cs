@@ -13,6 +13,7 @@ using CodeLens.Domain.Enums;
 using CodeLens.Domain.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
+using CodeLens.Domain.Constants;
 
 namespace CodeLens.Infrastructure.Services;
 
@@ -96,6 +97,16 @@ public class GitHubService : IGitHubService {
 
         if(repo.UserId != userId) throw new ForbiddenException("Access denied");
 
+        if (repo.IndexingStatus == IndexingStatus.Indexing || repo.IndexingStatus == IndexingStatus.Completed)
+        {
+            var existingFiles = await _fileRepo.GetFilesByRepoId(repoId);
+            return new IndexDto(
+                RepoId: repo.Id,
+                IndexingStatus: repo.IndexingStatus.ToString(),
+                Files: [..existingFiles.Select(f => new FileDto(f.Path, f.Type))]
+            );
+        }
+
         var tokens = await RefreshTokens(userId);
 
         var parts = repo.FullName.Split('/');
@@ -125,7 +136,14 @@ public class GitHubService : IGitHubService {
             Type = f.GetProperty("type").GetString() ?? string.Empty,
         }).ToList();
 
+        var indexableFiles = files.Where(f => f.Type == "blob" && IndexingConstants.IsIndexable(f.Path)); 
+
         await _fileRepo.UpsertFilesAsync(files);
+
+        repo.IndexingStatus = IndexingStatus.Indexing;
+        repo.TotalFiles = indexableFiles.Count();
+        repo.IndexedFiles = 0;
+        await _repoRepo.UpdateAsync(repo);
 
         var db = _redis.GetDatabase();
         await db.StreamAddAsync("indexing-jobs", [
@@ -142,18 +160,23 @@ public class GitHubService : IGitHubService {
 
     private async Task<GitHubTokenDto> RefreshTokens(Guid userId)
     {
-        //fetch fresh tokens for user
-        //tighten logic, use expires at so no extra reqs are made
         var user = await _userRepo.FindByIdAsync(userId)
         ?? throw new NotFoundException("User");
-        var token = user.GitHubRefreshToken ?? throw new NotFoundException("GitHub refresh token");
-        var decrypted = _hasher.AES_Decrypt(token);
-        var tokens = await _gitHubAuthService.GitHubRefreshAsync(decrypted);
-       
-       //save tokens
+
+        var accessToken = _hasher.AES_Decrypt(user.GitHubAccessToken);
+
+        // Only call GitHub's refresh endpoint if the token has an expiry and is about to expire
+        if (!user.TokenExpiresAt.HasValue || user.TokenExpiresAt.Value > DateTime.UtcNow.AddMinutes(5))
+            return new GitHubTokenDto(AccessToken: accessToken, RefreshToken: null, ExpiresAt: user.TokenExpiresAt);
+
+        var refreshToken = user.GitHubRefreshToken ?? throw new NotFoundException("GitHub refresh token");
+        var decryptedRefresh = _hasher.AES_Decrypt(refreshToken);
+        var tokens = await _gitHubAuthService.GitHubRefreshAsync(decryptedRefresh);
+
         user.GitHubAccessToken = _hasher.AES_Encrypt(tokens.AccessToken);
-        user.GitHubRefreshToken = _hasher.AES_Encrypt(tokens.RefreshToken!);
-        user.TokenExpiresAt= tokens.ExpiresAt;
+        if (tokens.RefreshToken != null)
+            user.GitHubRefreshToken = _hasher.AES_Encrypt(tokens.RefreshToken);
+        user.TokenExpiresAt = tokens.ExpiresAt;
         await _userRepo.UpdateAsync(user);
 
         return tokens;
@@ -170,6 +193,20 @@ public class GitHubService : IGitHubService {
             RepoId:repoId,
             IndexingStatus:repo.IndexingStatus.ToString(),
             Files: [..files.Select(f => new FileDto(f.Path,f.Type))]
+        );
+    }
+
+    public async Task<RepoStatusDto>GetRepoStatusAsync(Guid userId, Guid repoId)
+    {
+        var repo = await _repoRepo.GetRepoById(repoId) ?? throw new NotFoundException("Repo");
+        if(repo.UserId != userId) throw new ForbiddenException("No access to this repo");
+
+        return new RepoStatusDto(
+            repo.Id,
+            repo.IndexingStatus.ToString(),
+            repo.TotalFiles,
+            repo.IndexedFiles,
+            repo.TotalFiles == 0 ? 0 : (repo.IndexedFiles * 100) / repo.TotalFiles
         );
     }
 

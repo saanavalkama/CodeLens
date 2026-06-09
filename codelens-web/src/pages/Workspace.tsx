@@ -6,6 +6,8 @@ import { ScrollArea } from "../components/ui/scroll-area"
 import { Separator } from "../components/ui/separator"
 import { UseConversations, useCreateConversations } from "../features/chat/hooks/conversationHooks"
 import { useMessages, useSendMessage } from "../features/chat/hooks/messageHooks"
+import { useAutoIndexRepo, useIndexingStatus } from "../features/repos/hooks/repoHooks"
+import { useKeyStatus } from "../features/users/hooks/userHooks"
 
 export default function WorkSpace() {
   const params = useParams()
@@ -14,6 +16,11 @@ export default function WorkSpace() {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [input, setInput] = useState("")
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  useAutoIndexRepo(repoId)
+  const { data: indexingStatus } = useIndexingStatus(repoId)
+  const { data: keyStatus } = useKeyStatus()
+  const missingKey = keyStatus !== undefined && !keyStatus?.hasKey
 
   const conversationsQuery = UseConversations(repoId)
   const createConversation = useCreateConversations()
@@ -56,10 +63,37 @@ export default function WorkSpace() {
   const messages = messagesQuery.data ?? []
   const hasConversations = conversations.length > 0
 
+  const isIndexing = indexingStatus?.status === 'Indexing' || indexingStatus?.status === 'Pending'
+
   return (
-    <div className="flex h-[calc(100vh-3.5rem)]">
-      {/* Sidebar */}
-      <aside className="w-64 flex flex-col border-r border-white/10 bg-white/[0.03] shrink-0">
+    <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+      {missingKey && (
+        <div className="shrink-0 px-4 py-2.5 bg-amber-500/10 border-b border-amber-500/20 flex items-center gap-2">
+          <span className="text-amber-400 text-xs">
+            No OpenAI API key found. Add yours in{" "}
+            <a href="/app/settings" className="underline underline-offset-2 hover:text-amber-300 transition-colors">
+              Settings
+            </a>{" "}
+            to enable AI responses.
+          </span>
+        </div>
+      )}
+      {isIndexing && (
+        <div className="shrink-0 px-4 py-2 bg-white/[0.03] border-b border-white/10 flex items-center gap-3">
+          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+              style={{ width: `${indexingStatus.percentComplete}%` }}
+            />
+          </div>
+          <span className="text-xs text-white/40 shrink-0 tabular-nums">
+            {indexingStatus.indexedFiles} / {indexingStatus.totalFiles} files indexed
+          </span>
+        </div>
+      )}
+      <div className="flex flex-1 min-h-0">
+        {/* Sidebar */}
+        <aside className="w-64 flex flex-col border-r border-white/10 bg-white/[0.03] shrink-0">
         <div className="p-3">
           <Button
             variant="outline"
@@ -99,8 +133,8 @@ export default function WorkSpace() {
         </ScrollArea>
       </aside>
 
-      {/* Chat area */}
-      <div className="flex flex-col flex-1 min-w-0">
+        {/* Chat area */}
+        <div className="flex flex-col flex-1 min-w-0">
         {!hasConversations && !conversationsQuery.isPending ? (
           <div className="flex flex-col flex-1 items-center justify-center gap-4 text-center px-4">
             <p className="text-white/40 text-sm">No conversations yet</p>
@@ -174,7 +208,7 @@ export default function WorkSpace() {
                 />
                 <Button
                   onClick={handleSend}
-                  disabled={!input.trim() || !activeConversationId || sendMessage.isPending}
+                  disabled={!input.trim() || !activeConversationId || sendMessage.isPending || missingKey}
                   className="bg-indigo-600 hover:bg-indigo-500 text-white shrink-0 h-10"
                 >
                   Send
@@ -184,6 +218,7 @@ export default function WorkSpace() {
             </div>
           </>
         )}
+        </div>
       </div>
     </div>
   )
