@@ -17,11 +17,12 @@ async def search(
     if x_internal_api_key != INTERNAL_API_KEY:
         raise HTTPException(status_code=401, detail="Unauthorized")
     try:
-        answer = await _service.search(request)
+        return await _service.search(request)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except AuthenticationError:
-        raise HTTPException(status_code=502, detail="OpenAI authentication failed — check OPENAI_API_KEY")
+        raise HTTPException(status_code=502, detail="OpenAI authentication failed — check your API key")
     except APIStatusError as e:
         raise HTTPException(status_code=502, detail=f"OpenAI API error: {e.message}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
-    return SearchResponse(answer=answer)

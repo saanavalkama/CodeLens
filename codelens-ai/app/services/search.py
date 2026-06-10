@@ -1,4 +1,4 @@
-from app.models.search import SearchRequest
+from app.models.search import SearchRequest, SearchResponse, ChunkDto, TokenUsage
 from app.services.embedder import embed_query
 from app.services.retrieval import retrieve_chunks
 from openai import AsyncOpenAI
@@ -27,7 +27,19 @@ class SearchService:
         embedded = embed_query(request.query)
         chunks = await retrieve_chunks(request.repoId, embedded, 8)
         messages = self._build_prompt(request.query, chunks, request.history)
-        return await self._call_LLM(client,messages)
+        answer, usage =  await self._call_LLM(client,messages)
+        return SearchResponse(
+            answer=answer,
+            chunks=[ChunkDto(
+                file_path = c.file_path,
+                content=c.content,
+                start_line=c.start_line,
+                end_line=c.end_line,
+                similarity=c.similarity
+                
+            ) for c in chunks],
+            usage=usage
+        )
 
 
     def _build_prompt(self, query, chunks, history):
@@ -51,11 +63,16 @@ class SearchService:
         
         return messages   
     
-    async def _call_LLM(self, client: AsyncOpenAI, messages:list[dict]) -> str:
+    async def _call_LLM(self, client: AsyncOpenAI, messages:list[dict]) -> tuple[str,TokenUsage]:
         res = await client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
             temperature=0.1
         )
-        return res.choices[0].message.content
+        usage = TokenUsage(
+            prompt_tokens=res.usage.prompt_tokens,
+            completion_tokens=res.usage.completion_tokens,
+            total_tokens=res.usage.total_tokens
+        )
+        return res.choices[0].message.content, usage
     

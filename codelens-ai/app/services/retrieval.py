@@ -6,6 +6,8 @@ from dataclasses import dataclass
 class RetrievedChunk:
     content: str
     file_path: str
+    start_line: int
+    end_line: int
     similarity: float
 
 async def retrieve_chunks(
@@ -19,6 +21,8 @@ async def retrieve_chunks(
         rows = await conn.fetch("""
             SELECT
                 fc."Content" as content,
+                fc."StartLine" as start_line,
+                fc."EndLine" as end_line,
                 rf."Path" as file_path,
                 1 - (fc."Embedding" <=> $1::vector) AS similarity
             FROM "FileChunks" fc
@@ -32,6 +36,8 @@ async def retrieve_chunks(
             RetrievedChunk(
                 content=row["content"],
                 file_path=row["file_path"],
+                start_line=row["start_line"],
+                end_line=row["end_line"],
                 similarity=row["similarity"]
             )
             for row in rows
