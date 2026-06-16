@@ -13,7 +13,7 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-import { useCreateOrUpdateKey, useKeyStatus, useDeleteUser } from "../hooks/userHooks"
+import { useCreateOrUpdateKey, useKeyStatus, useDeleteUser, useDeleteKey } from "../hooks/userHooks"
 import { useAuthStore } from "@/store/authStore"
 
 type Section = "api-key" | "delete-account"
@@ -35,6 +35,7 @@ export default function SettingsPage() {
 
   const { data: keyStatus, isPending: statusLoading } = useKeyStatus()
   const saveKey = useCreateOrUpdateKey()
+  const deleteKey = useDeleteKey()
   const deleteUser = useDeleteUser()
 
   const hasKey: boolean = keyStatus?.hasKey ?? false
@@ -98,14 +99,25 @@ export default function SettingsPage() {
                   <p className="text-white/40 text-sm mt-1">Used for semantic search and code analysis.</p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   {statusLoading ? (
                     <span className="text-white/30 text-xs">Checking…</span>
                   ) : hasKey ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs text-emerald-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                      Key added
-                    </span>
+                    <>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs text-emerald-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                        Key added
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={deleteKey.isPending}
+                        onClick={() => deleteKey.mutate()}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 px-2 text-xs"
+                      >
+                        {deleteKey.isPending ? "Deleting…" : "Delete key"}
+                      </Button>
+                    </>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-xs text-white/40">
                       <span className="w-1.5 h-1.5 rounded-full bg-white/30 inline-block" />

@@ -14,4 +14,6 @@ public interface IUserService
     Task <bool> KeyStatusAsync(Guid userId);
 
     Task DeleteUserAsync(Guid userId);
+
+    Task DeleteKeyAsync(Guid userId);
 }
