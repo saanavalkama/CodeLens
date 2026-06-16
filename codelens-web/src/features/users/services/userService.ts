@@ -13,5 +13,9 @@ export const userService = {
     getKeyStatus: async() => {
         const response = await api.get(`${baseUrl}/openai-key`)
         return response.data
+    },
+    
+    deleteUser: async() => {
+        await api.delete(baseUrl)
     }
 }
