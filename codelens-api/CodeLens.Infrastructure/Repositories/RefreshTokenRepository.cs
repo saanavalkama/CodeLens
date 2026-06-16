@@ -40,12 +40,10 @@ public class RefreshTokenRepository : IRefreshTokenRepository
  
     public async Task RevokeAsync(RefreshToken token)
     {
-        var existingToken = await _context.RefreshTokens.FirstOrDefaultAsync(t => t.Id == token.Id);
-        if (existingToken != null)
-        {
-            existingToken.RevokedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-        }
+       //gets called after token hash has been found, so item exists for sure
+        token.RevokedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        
 
     }
 }

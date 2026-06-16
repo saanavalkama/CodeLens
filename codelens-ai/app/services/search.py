@@ -21,7 +21,7 @@ class SearchService:
                 raise ValueError("No OpenAI API key configured for this user")
             return decrypt_token(encrypted)
 
-    async def search(self, request:SearchRequest) -> str:
+    async def search(self, request:SearchRequest) -> SearchResponse:
         api_key = await self._get_openai_key(request.userId)
         client = AsyncOpenAI(api_key=api_key)
         embedded = embed_query(request.query)
