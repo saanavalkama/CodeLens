@@ -17,5 +17,9 @@ export const userService = {
     
     deleteUser: async() => {
         await api.delete(baseUrl)
+    },
+
+    deleteKey:async()=> {
+        await api.delete(`${baseUrl}/openai-key`)
     }
 }

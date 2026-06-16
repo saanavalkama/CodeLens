@@ -48,7 +48,7 @@ public class UserContoller : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("opeanai-key")]
+    [HttpDelete("openai-key")]
     public async Task<IActionResult> DeleteKeyAsync()
     {
         await _service.DeleteKeyAsync(GetAndParseUserId());

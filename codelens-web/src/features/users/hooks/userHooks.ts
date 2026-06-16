@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { userService } from "../services/userService"
 import { toast } from "sonner"
 import { useMe } from "@/features/auth/hooks/authHooks"
-import { useAuthStore } from "@/store/authStore"
+
 
 export const useCreateOrUpdateKey = () => {
     const qc = useQueryClient()
@@ -37,5 +37,18 @@ export const useDeleteUser = () => {
             toast.success("user deleted")
         },
         onError:()=>toast.error("Deletion failed")
+    })
+}
+
+export const useDeleteKey = () => {
+    const {data:me} = useMe()
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn:()=>userService.deleteKey(),
+        onSuccess:()=>{
+            toast.success("Deleted the openai key")
+            qc.invalidateQueries({queryKey:['openai-key-status',me?.id]})
+        },
+        onError:()=>toast.error("Openai key deletion failed")
     })
 }
