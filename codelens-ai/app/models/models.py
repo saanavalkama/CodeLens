@@ -35,7 +35,7 @@ class RepositoryFile(Base):
     __tablename__ = "RepositoryFiles"
 
     id = Column("Id",UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    repository_id = Column("RepositoryId", UUID(as_uuid=True), ForeignKey("Repositories.Id"))
+    repository_id = Column("RepositoryId", UUID(as_uuid=True), ForeignKey("Repositories.Id"), ondelete="CASCADE")
     path = Column("Path", String)
     sha = Column("Sha", String)
     type = Column("Type", String)
@@ -49,7 +49,7 @@ class FileChunk(Base):
     __tablename__ = "FileChunks"
 
     id = Column("Id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    repository_file_id = Column("RepositoryFileId", UUID(as_uuid=True), ForeignKey("RepositoryFiles.Id"))
+    repository_file_id = Column("RepositoryFileId", UUID(as_uuid=True), ForeignKey("RepositoryFiles.Id"), ondelete="CASCADE")
     content = Column("Content", Text)
     embedding = Column("Embedding", Vector(768))
     chunk_index = Column("ChunkIndex", Integer)

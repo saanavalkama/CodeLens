@@ -97,4 +97,9 @@ public class UserService : IUserService
             ?? throw new NotFoundException("User");
         return !string.IsNullOrEmpty(user.EncryptedOpenAIKey);
     }
+
+    public async Task DeleteUserAsync(Guid userId)
+    {
+        await _repo.DeleteUserAsync(userId);
+    }
 }
