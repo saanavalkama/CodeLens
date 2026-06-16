@@ -41,4 +41,11 @@ public class UserContoller : ControllerBase
         
     }
 
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUserAsync()
+    {
+        await _service.DeleteUserAsync(GetAndParseUserId());
+        return NoContent();
+    }
+
 }

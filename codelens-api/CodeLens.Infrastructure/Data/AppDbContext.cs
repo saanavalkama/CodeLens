@@ -38,6 +38,7 @@ public class AppDbContext: DbContext
               .WithMany(u => u.Repositories)
               .HasForeignKey(r => r.UserId)
               .OnDelete(DeleteBehavior.Cascade);
+            
         });
 
         modelBuilder.Entity<RefreshToken>(entity =>
@@ -69,6 +70,17 @@ public class AppDbContext: DbContext
             entity.HasKey(c => c.Id);
             entity.HasIndex(c => c.UserId);
             entity.HasIndex(c => c.RepositoryId);
+            entity
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity
+                .HasOne(c => c.Repository)
+                .WithMany()
+                .HasForeignKey(c => c.RepositoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         });
 
         modelBuilder.Entity<Message>(entity =>

@@ -39,4 +39,14 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
     }
+
+    public async Task DeleteUserAsync(Guid userId)
+    {
+        var entity = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (entity != null)
+        {
+            _context.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
+    }
 }
