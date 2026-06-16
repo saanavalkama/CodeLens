@@ -102,4 +102,17 @@ public class UserService : IUserService
     {
         await _repo.DeleteUserAsync(userId);
     }
+
+    public async Task DeleteKeyAsync(Guid userId)
+    {
+        var user = await _repo.FindByIdAsync(userId)
+            ?? throw new NotFoundException("User");
+
+        user.EncryptedOpenAIKey = null;
+        await _repo.UpdateAsync(user);
+        
+
+    }
+
+ 
 }

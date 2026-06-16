@@ -48,4 +48,11 @@ public class UserContoller : ControllerBase
         return NoContent();
     }
 
+    [HttpDelete("opeanai-key")]
+    public async Task<IActionResult> DeleteKeyAsync()
+    {
+        await _service.DeleteKeyAsync(GetAndParseUserId());
+        return NoContent();
+    }
+
 }
