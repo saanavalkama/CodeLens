@@ -27,9 +27,9 @@ public class UserContoller : ControllerBase
     }
 
     [HttpPut("openai-key")]
-    public async Task<IActionResult> CreateOrUpdateOpenAiKey([FromBody] string key)
+    public async Task<IActionResult> CreateOrUpdateOpenAiKey([FromBody] UpdateOpenAiKeyDto dto)
     {
-        await _service.CreateOrUpdateKeyAsync(GetAndParseUserId(),key);
+        await _service.CreateOrUpdateKeyAsync(GetAndParseUserId(), dto.Key);
         return NoContent();
     }
 

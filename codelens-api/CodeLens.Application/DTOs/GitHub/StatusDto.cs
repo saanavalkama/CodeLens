@@ -5,5 +5,6 @@ public record RepoStatusDto(
     string Status,
     int TotalFiles,
     int IndexedFiles,
-    int PercentComplete
+    int PercentComplete,
+    DateTime? LastProgressAt
 );

@@ -128,20 +128,21 @@ public class GitHubService : IGitHubService {
         repo.IsTruncated = truncated;
         await _repoRepo.UpdateAsync(repo);
 
-        var files = tree.EnumerateArray().Select(f => new RepositoryFile
-        {
-            RepositoryId = repo.Id,
-            Path = f.GetProperty("path").GetString() ?? string.Empty,
-            Sha = f.GetProperty("sha").GetString() ?? string.Empty,
-            Type = f.GetProperty("type").GetString() ?? string.Empty,
-        }).ToList();
+        var indexableFiles = tree.EnumerateArray()
+            .Where(f => (f.GetProperty("type").GetString() ?? string.Empty) == "blob"
+                     && IndexingConstants.IsIndexable(f.GetProperty("path").GetString() ?? string.Empty))
+            .Select(f => new RepositoryFile
+            {
+                RepositoryId = repo.Id,
+                Path = f.GetProperty("path").GetString() ?? string.Empty,
+                Sha = f.GetProperty("sha").GetString() ?? string.Empty,
+                Type = f.GetProperty("type").GetString() ?? string.Empty,
+            }).ToList();
 
-        var indexableFiles = files.Where(f => f.Type == "blob" && IndexingConstants.IsIndexable(f.Path)); 
-
-        await _fileRepo.UpsertFilesAsync(files);
+        await _fileRepo.UpsertFilesAsync(indexableFiles);
 
         repo.IndexingStatus = IndexingStatus.Indexing;
-        repo.TotalFiles = indexableFiles.Count();
+        repo.TotalFiles = indexableFiles.Count;
         repo.IndexedFiles = 0;
         await _repoRepo.UpdateAsync(repo);
 
@@ -154,7 +155,7 @@ public class GitHubService : IGitHubService {
         return new IndexDto(
             RepoId:repo.Id,
             IndexingStatus: repo.IndexingStatus.ToString(),
-            Files: [..files.Select(f => new FileDto(f.Path,f.Type))]
+            Files: [..indexableFiles.Select(f => new FileDto(f.Path,f.Type))]
         );
     }
 
@@ -201,12 +202,23 @@ public class GitHubService : IGitHubService {
         var repo = await _repoRepo.GetRepoById(repoId) ?? throw new NotFoundException("Repo");
         if(repo.UserId != userId) throw new ForbiddenException("No access to this repo");
 
+        if (repo.IndexingStatus == IndexingStatus.Indexing)
+        {
+            var lastActivity = repo.LastProgressAt ?? repo.UpdatedAt;
+            if (lastActivity < DateTime.UtcNow.AddMinutes(-15))
+            {
+                repo.IndexingStatus = IndexingStatus.Failed;
+                await _repoRepo.UpdateAsync(repo);
+            }
+        }
+
         return new RepoStatusDto(
             repo.Id,
             repo.IndexingStatus.ToString(),
             repo.TotalFiles,
             repo.IndexedFiles,
-            repo.TotalFiles == 0 ? 0 : (repo.IndexedFiles * 100) / repo.TotalFiles
+            repo.TotalFiles == 0 ? 0 : (repo.IndexedFiles * 100) / repo.TotalFiles,
+            repo.LastProgressAt
         );
     }
 

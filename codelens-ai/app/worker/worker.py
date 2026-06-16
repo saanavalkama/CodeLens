@@ -7,12 +7,10 @@ from sqlalchemy import select, text
 from app.db.session import AsyncSessionLocal
 from app.models.models import User, Repository, RepositoryFile, FileChunk
 from app.services.fetchContents import fetch_contents, FetchStatus
-from app.services.is_indexable import is_indexable
 from app.services.fetch_tokens import fetch_tokens
 from app.services.decrypt import decrypt_token
 from app.services.chunking import chunk_file
 from app.services.embedder import embed_chunks
-from sqlalchemy.orm import selectinload
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 STREAM_NAME = "indexing-jobs"
@@ -29,100 +27,123 @@ async def process_job(repo_id: str, user_id: str):
     print("process started")
     repo_uuid = uuid.UUID(repo_id)
     user_uuid = uuid.UUID(user_id)
+
     async with AsyncSessionLocal() as db:
         files_result = await db.execute(
             select(RepositoryFile)
             .where(RepositoryFile.repository_id == repo_uuid)
-            .options(selectinload(RepositoryFile.repository))
+            .where(RepositoryFile.indexing_status == IndexingStatus.Pending)
         )
         files = files_result.scalars().all()
 
-        user_result = await db.execute(
-            select(User).where(User.id == user_uuid)
-        )
+        user_result = await db.execute(select(User).where(User.id == user_uuid))
         user = user_result.scalar_one_or_none()
 
-        if not user or not files:
-            print(f"No user or files found for repo {repo_id}")
+        repo_result = await db.execute(select(Repository).where(Repository.id == repo_uuid))
+        repo = repo_result.scalar_one_or_none()
+
+        if not user or not repo:
+            print(f"No user or repo found for {repo_id}")
             return
 
-        # Capture everything needed before commit — commit expires all ORM objects
-        repo_name = files[0].repository.full_name.split("/")[1]
+        if not files:
+            print(f"No pending files for repo {repo_id}")
+            await db.execute(
+                text('UPDATE "Repositories" SET "IndexingStatus" = :status WHERE "Id" = :repo_id'),
+                {"status": IndexingStatus.Completed, "repo_id": repo_uuid}
+            )
+            await db.commit()
+            return
+
+        repo_name = repo.full_name.split("/")[1]
         githubusername = user.github_username
         decrypted_token = decrypt_token(user.github_access_token)
+        file_data = [(file.id, file.path) for file in files]
 
-        await db.execute(
-            text('UPDATE "Repositories" SET "IndexingStatus" = :status, "IndexedFiles" = 0 WHERE "Id" = :repo_id'),
-            {"status": IndexingStatus.Indexing, "repo_id": repo_uuid}
-        )
-        await db.commit()
+    print(f"Indexing {len(file_data)} pending files for repo {repo_id}")
 
-        # Re-fetch files without relationship after commit
-        files_result = await db.execute(
-            select(RepositoryFile).where(RepositoryFile.repository_id == repo_uuid)
-        )
-        files = files_result.scalars().all()
+    for file_id, file_path in file_data:
+        status, content = await fetch_contents(decrypted_token, githubusername, repo_name, file_path)
 
-        print(f"Indexing {len(files)} files for repo {repo_id}")
+        if status == FetchStatus.UNAUTHORIZED:
+            flag = await fetch_tokens(user_id)
+            if not flag:
+                print(f"Token refresh failed for user {user_id}")
+                async with AsyncSessionLocal() as fail_db:
+                    await fail_db.execute(
+                        text('UPDATE "Repositories" SET "IndexingStatus" = :status WHERE "Id" = :repo_id'),
+                        {"status": IndexingStatus.Failed, "repo_id": repo_uuid}
+                    )
+                    await fail_db.commit()
+                return
 
-        for file in files:
-            if not is_indexable(file.path):
-                continue
-
-            status, content = await fetch_contents(decrypted_token, githubusername, repo_name, file.path)
-
-            if status == FetchStatus.UNAUTHORIZED:
-                flag = await fetch_tokens(user_id)
-                if not flag:
-                    print(f"Token refresh failed for user {user_id}")
-                    return
-
-                user_result = await db.execute(select(User).where(User.id == user_uuid))
+            async with AsyncSessionLocal() as token_db:
+                user_result = await token_db.execute(select(User).where(User.id == user_uuid))
                 user = user_result.scalar_one_or_none()
                 decrypted_token = decrypt_token(user.github_access_token)
 
-                status, content = await fetch_contents(decrypted_token, githubusername, repo_name, file.path)
+            status, content = await fetch_contents(decrypted_token, githubusername, repo_name, file_path)
 
-                if status != FetchStatus.OK or content is None:
-                    print(f"Retry failed for {file.path}")
-                    file.indexing_status = IndexingStatus.Failed
-                    continue
-
-            if status == FetchStatus.ERROR or content is None:
-                print(f"Skipping {file.path}")
-                file.indexing_status = IndexingStatus.Failed
+            if status != FetchStatus.OK or content is None:
+                print(f"Retry failed for {file_path}")
+                async with AsyncSessionLocal() as err_db:
+                    await err_db.execute(
+                        text('UPDATE "RepositoryFiles" SET "IndexingStatus" = :status WHERE "Id" = :id'),
+                        {"status": IndexingStatus.Failed, "id": file_id}
+                    )
+                    await err_db.execute(
+                        text('UPDATE "Repositories" SET "IndexedFiles" = "IndexedFiles" + 1, "LastProgressAt" = NOW() WHERE "Id" = :repo_id'),
+                        {"repo_id": repo_uuid}
+                    )
+                    await err_db.commit()
                 continue
 
-            chunks = chunk_file(content, file.path)
-            embedded = embed_chunks(chunks)
+        if status == FetchStatus.ERROR or content is None:
+            print(f"Skipping {file_path}")
+            async with AsyncSessionLocal() as err_db:
+                await err_db.execute(
+                    text('UPDATE "RepositoryFiles" SET "IndexingStatus" = :status WHERE "Id" = :id'),
+                    {"status": IndexingStatus.Failed, "id": file_id}
+                )
+                await err_db.execute(
+                    text('UPDATE "Repositories" SET "IndexedFiles" = "IndexedFiles" + 1, "LastProgressAt" = NOW() WHERE "Id" = :repo_id'),
+                    {"repo_id": repo_uuid}
+                )
+                await err_db.commit()
+            continue
 
+        chunks = chunk_file(content, file_path)
+        embedded = embed_chunks(chunks)
+
+        async with AsyncSessionLocal() as file_db:
             for chunk, vector in embedded:
                 db_chunk = FileChunk(
-                    repository_file_id=file.id,
+                    repository_file_id=file_id,
                     content=chunk.content,
                     embedding=vector,
                     chunk_index=chunk.chunk_index,
                     start_line=chunk.start_line,
                     end_line=chunk.end_line,
                 )
-                db.add(db_chunk)
+                file_db.add(db_chunk)
+            await file_db.execute(
+                text('UPDATE "RepositoryFiles" SET "IndexingStatus" = :status WHERE "Id" = :id'),
+                {"status": IndexingStatus.Completed, "id": file_id}
+            )
+            await file_db.execute(
+                text('UPDATE "Repositories" SET "IndexedFiles" = "IndexedFiles" + 1, "LastProgressAt" = NOW() WHERE "Id" = :repo_id'),
+                {"repo_id": repo_uuid}
+            )
+            await file_db.commit()
 
-            file.indexing_status = IndexingStatus.Completed
-
-            # Commit counter in a separate session so polling can see real-time progress
-            async with AsyncSessionLocal() as counter_db:
-                await counter_db.execute(
-                    text('UPDATE "Repositories" SET "IndexedFiles" = "IndexedFiles" + 1 WHERE "Id" = :repo_id'),
-                    {"repo_id": repo_uuid}
-                )
-                await counter_db.commit()
-
-        await db.execute(
+    async with AsyncSessionLocal() as final_db:
+        await final_db.execute(
             text('UPDATE "Repositories" SET "IndexingStatus" = :status WHERE "Id" = :repo_id'),
             {"status": IndexingStatus.Completed, "repo_id": repo_uuid}
         )
-        await db.commit()
-        print(f"files processed for {repo_id}")
+        await final_db.commit()
+
+    print(f"files processed for {repo_id}")
 
 async def _process_entries(r, entries):
     for entry_id, data in entries:

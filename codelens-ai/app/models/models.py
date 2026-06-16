@@ -29,6 +29,7 @@ class Repository(Base):
     default_branch = Column("DefaultBranch", String)
     user_id = Column("UserId", UUID(as_uuid=True))
     indexing_status = Column("IndexingStatus", Integer)
+    last_progress_at = Column("LastProgressAt", DateTime, nullable=True)
 
 class RepositoryFile(Base):
     __tablename__ = "RepositoryFiles"

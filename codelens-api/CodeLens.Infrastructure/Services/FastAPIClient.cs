@@ -16,17 +16,22 @@ public class FastAPIClient : IFastApiClient
         _httpClient = httpClient;
     }
 
-    private static readonly JsonSerializerOptions _jsonOptions = new()
+    private static readonly JsonSerializerOptions _requestOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
+    private static readonly JsonSerializerOptions _responseOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    };
+
     public async Task <SearchResponseDto>SearchAsync(SearchRequestDto request, CancellationToken ct)
     {
-        var response = await _httpClient.PostAsJsonAsync("/search", request, _jsonOptions, ct);
+        var response = await _httpClient.PostAsJsonAsync("/search", request, _requestOptions, ct);
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<SearchResponseDto>(_jsonOptions, ct);
+        var result = await response.Content.ReadFromJsonAsync<SearchResponseDto>(_responseOptions, ct);
         return result!;
     }
 }

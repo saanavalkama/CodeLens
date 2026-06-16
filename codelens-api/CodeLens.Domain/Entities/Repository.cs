@@ -37,5 +37,6 @@ public class Repository
 
     public int IndexedFiles {get;set;}
 
+    public DateTime? LastProgressAt {get;set;}
 
 }

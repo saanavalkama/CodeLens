@@ -8,6 +8,8 @@ import { UseConversations, useCreateConversations } from "../features/chat/hooks
 import { useMessages, useSendMessage } from "../features/chat/hooks/messageHooks"
 import { useAutoIndexRepo, useIndexingStatus } from "../features/repos/hooks/repoHooks"
 import { useKeyStatus } from "../features/users/hooks/userHooks"
+import CodeCollapsible from "../features/chat/components/CodeCollabsible"
+import type { Chunk, TokenUsage } from "../types/types"
 
 export default function WorkSpace() {
   const params = useParams()
@@ -15,6 +17,7 @@ export default function WorkSpace() {
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [input, setInput] = useState("")
+  const [responseMeta, setResponseMeta] = useState<Record<string, { chunks: Chunk[]; usage: TokenUsage }>>({})
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useAutoIndexRepo(repoId)
@@ -48,7 +51,14 @@ export default function WorkSpace() {
   const handleSend = () => {
     const trimmed = input.trim()
     if (!trimmed || !activeConversationId) return
-    sendMessage.mutate({ repoId, conversationId: activeConversationId, message: trimmed })
+    const convId = activeConversationId
+    sendMessage.mutate({ repoId, conversationId: convId, message: trimmed }, {
+      onSuccess: (data) => {
+        if (data.chunks?.length || data.usage) {
+          setResponseMeta((prev) => ({ ...prev, [convId]: { chunks: data.chunks ?? [], usage: data.usage } }))
+        }
+      }
+    })
     setInput("")
   }
 
@@ -154,32 +164,47 @@ export default function WorkSpace() {
                 {messagesQuery.isPending && activeConversationId && (
                   <p className="text-white/30 text-sm text-center">Loading messages…</p>
                 )}
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    {msg.role !== "user" && (
-                      <div className="shrink-0 w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xs text-indigo-300 mt-0.5">
-                        AI
+                {messages.map((msg, i) => {
+                  const isLastAI = msg.role !== "user" && i === messages.length - 1
+                  const meta = isLastAI && activeConversationId ? responseMeta[activeConversationId] : undefined
+                  return (
+                    <div key={i} className="flex flex-col gap-2">
+                      <div className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                        {msg.role !== "user" && (
+                          <div className="shrink-0 w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xs text-indigo-300 mt-0.5">
+                            AI
+                          </div>
+                        )}
+                        <div
+                          className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                            msg.role === "user"
+                              ? "bg-indigo-600/80 text-white rounded-br-sm"
+                              : "bg-white/[0.06] text-white/90 rounded-bl-sm"
+                          }`}
+                        >
+                          {msg.content}
+                          {meta?.usage && (
+                            <p className="mt-2 pt-2 border-t border-white/10 text-white/25 text-xs tabular-nums">
+                              {meta.usage.promptTokens} prompt · {meta.usage.completionTokens} completion · {meta.usage.totalTokens} total tokens
+                            </p>
+                          )}
+                        </div>
+                        {msg.role === "user" && (
+                          <div className="shrink-0 w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs text-white/60 mt-0.5">
+                            U
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div
-                      className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                        msg.role === "user"
-                          ? "bg-indigo-600/80 text-white rounded-br-sm"
-                          : "bg-white/[0.06] text-white/90 rounded-bl-sm"
-                      }`}
-                    >
-                      {msg.content}
+                      {meta?.chunks && meta.chunks.length > 0 && (
+                        <div className="flex flex-col gap-1.5 pl-10">
+                          {meta.chunks.map((chunk, ci) => (
+                            <CodeCollapsible key={ci} {...chunk} />
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    {msg.role === "user" && (
-                      <div className="shrink-0 w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs text-white/60 mt-0.5">
-                        U
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
                 {sendMessage.isPending && (
                   <div className="flex gap-3 justify-start">
                     <div className="shrink-0 w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xs text-indigo-300 mt-0.5">

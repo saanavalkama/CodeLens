@@ -34,8 +34,24 @@ export interface ConversationResponse{
    cratedAt:string 
 }
 
+export interface Chunk {
+    filePath:string,
+    content:string,
+    startLine:number,
+    endLine:number,
+    similarity:number
+}
+
+export interface TokenUsage{
+    promptTokens:string,
+    completionTokens:string,
+    totalTokens:string
+}
+
 export interface MessageResponse{
-    answer:string
+    answer:string,
+    chunks:Chunk[],
+    usage:TokenUsage
 }
 
 export interface Message{
