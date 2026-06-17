@@ -61,4 +61,13 @@ public class GitHubController : ControllerBase
         return Ok(dto);
     }
 
+    [HttpPost("repos/{repoId:guid}/re-index")]
+    public async Task<IActionResult>ReIndexRepo(Guid repoId)
+    {
+        await _service.ReIndexRepo(repoId, GetAndParseUserId());
+        return NoContent();
+    }
+
+    
+
 }
