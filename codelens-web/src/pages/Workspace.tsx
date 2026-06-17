@@ -6,7 +6,7 @@ import { ScrollArea } from "../components/ui/scroll-area"
 import { Separator } from "../components/ui/separator"
 import { UseConversations, useCreateConversations } from "../features/chat/hooks/conversationHooks"
 import { useMessages, useSendMessage } from "../features/chat/hooks/messageHooks"
-import { useAutoIndexRepo, useIndexingStatus } from "../features/repos/hooks/repoHooks"
+import { useAutoIndexRepo, useIndexingStatus, useReIndex } from "../features/repos/hooks/repoHooks"
 import { useKeyStatus } from "../features/users/hooks/userHooks"
 import CodeCollapsible from "../features/chat/components/CodeCollabsible"
 import type { Chunk, TokenUsage } from "../types/types"
@@ -22,6 +22,7 @@ export default function WorkSpace() {
 
   useAutoIndexRepo(repoId)
   const { data: indexingStatus } = useIndexingStatus(repoId)
+  const reIndex = useReIndex()
   const { data: keyStatus } = useKeyStatus()
   const missingKey = keyStatus !== undefined && !keyStatus?.hasKey
 
@@ -141,6 +142,19 @@ export default function WorkSpace() {
             ))}
           </div>
         </ScrollArea>
+
+        <Separator className="bg-white/10" />
+        <div className="p-3">
+          <Button
+            variant="outline"
+            onClick={() => reIndex.mutate(repoId)}
+            disabled={isIndexing || reIndex.isPending}
+            className="w-full justify-start gap-2 border-white/10 bg-transparent text-white/70 hover:text-white hover:bg-white/10"
+          >
+            <span className="text-base leading-none">↻</span>
+            {reIndex.isPending ? "Starting…" : "Re-index"}
+          </Button>
+        </div>
       </aside>
 
         {/* Chat area */}

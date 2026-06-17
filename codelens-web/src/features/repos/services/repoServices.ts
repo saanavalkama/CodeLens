@@ -28,6 +28,10 @@ export const repoServices = {
     getStatus: async(repoId:string):Promise<RepoStatus> => {
         const response = await api.get<RepoStatus>(`${baseUrl}/${repoId}/status`)
         return response.data
+    },
+
+    reIndex: async(repoId:string):Promise<void> => {
+        await api.post(`${baseUrl}/${repoId}/re-index`)    
     }
 
 }

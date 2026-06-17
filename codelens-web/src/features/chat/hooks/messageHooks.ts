@@ -17,6 +17,7 @@ export const useSendMessage = () => {
         mutationFn: (data: MessageRequest) => messageService.sendMessage(data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['messages', variables.repoId, variables.conversationId] })
+            queryClient.invalidateQueries({queryKey:['conversations',variables.repoId]})
         },
         onError: () => {
             toast.error("Failed to send message")
