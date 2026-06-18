@@ -4,6 +4,8 @@ using CodeLens.Application.Interfaces.Chat;
 using CodeLens.Application.Interfaces.Search;
 using CodeLens.Domain.Entities;
 using CodeLens.Domain.Exceptions;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace CodeLens.Application.Services;
 
@@ -12,19 +14,25 @@ public class MessageService : IMessageService
     private readonly IFastApiClient _client;
     private readonly IConversationRepository _conversationRepository;
     private readonly IMessageRepository _messageRepository;
+
+    private readonly ILogger<MessageService> _logger;
     public MessageService(
         IFastApiClient client,
         IConversationRepository conversationRepository,
-        IMessageRepository messageRepository
+        IMessageRepository messageRepository,
+        ILogger<MessageService> logger
     )
     {
         _client = client;
         _conversationRepository = conversationRepository;
         _messageRepository = messageRepository;
+        _logger = logger;
     }
 
     public async Task<SearchResponseDto>SearchAsync(Guid userId, Guid repoId, Guid conversationId, string message, CancellationToken ct)
     {
+        var sw = Stopwatch.StartNew();
+
        var conversation = await _conversationRepository.GetByIdAsync(conversationId)
             ?? throw new NotFoundException("Conversation");
        if(conversation.UserId != userId) throw new UnauthorizedException("No access to this resource");
@@ -53,7 +61,14 @@ public class MessageService : IMessageService
 
        await _messageRepository.SaveMessageAsync(userMessage);
 
+       _logger.LogInformation("Search started for repo {RepoId} conversation {ConversationId} query length {QueryLength}",
+            repoId, conversationId, message.Length);
+
+        var fastApiSw = Stopwatch.StartNew();
+
        var searchResponseDto = await _client.SearchAsync(requestDto, ct);
+
+       fastApiSw.Stop();
     
        var assistantMessage = new Message
        {
@@ -67,6 +82,13 @@ public class MessageService : IMessageService
        conversation.UpdatedAt = DateTime.UtcNow;
 
        await _conversationRepository.UpdateAsync(conversation);
+
+       sw.Stop();
+
+        _logger.LogInformation(
+            "Search completed for repo {RepoId} | total {TotalMs}ms | fastapi {FastApiMs}ms | tokens {TotalTokens}",
+            repoId, sw.ElapsedMilliseconds, fastApiSw.ElapsedMilliseconds,
+            searchResponseDto.Usage?.TotalTokens ?? 0);
 
         return searchResponseDto;
     }
