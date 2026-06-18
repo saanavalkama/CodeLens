@@ -3,6 +3,7 @@ using System;
 using CodeLens.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CodeLens.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260616111646_AddFileChunkEntity")]
+    partial class AddFileChunkEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,22 +60,6 @@ namespace CodeLens.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
-                });
-
-            modelBuilder.Entity("CodeLens.Domain.Entites.FileChunk", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("RepositoryFileId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RepositoryFileId");
-
-                    b.ToTable("FileChunks", (string)null);
                 });
 
             modelBuilder.Entity("CodeLens.Domain.Entites.Repository", b =>
@@ -303,15 +290,6 @@ namespace CodeLens.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CodeLens.Domain.Entites.FileChunk", b =>
-                {
-                    b.HasOne("CodeLens.Domain.Entites.RepositoryFile", null)
-                        .WithMany()
-                        .HasForeignKey("RepositoryFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("CodeLens.Domain.Entites.Repository", b =>
