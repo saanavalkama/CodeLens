@@ -1,0 +1,19 @@
+2026-06-18 14:04:54 [INF] HTTP OPTIONS /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 204 in 1.8529 ms
+2026-06-18 14:04:54 [INF] HTTP OPTIONS /api/user/openai-key responded 204 in 1.8519 ms
+2026-06-18 14:04:54 [INF] HTTP OPTIONS /api/auth/me responded 204 in 1.8618 ms
+2026-06-18 14:04:54 [INF] HTTP GET /api/user/openai-key responded 200 in 318.9879 ms
+2026-06-18 14:04:54 [INF] HTTP GET /api/auth/me responded 200 in 320.0851 ms
+2026-06-18 14:04:54 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 200 in 323.7300 ms
+2026-06-18 14:05:17 [INF] HTTP OPTIONS /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 204 in 0.7288 ms
+2026-06-18 14:05:17 [INF] HTTP POST /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 401 in 18.1595 ms
+2026-06-18 14:05:17 [INF] HTTP OPTIONS /api/auth/refresh responded 204 in 0.0826 ms
+2026-06-18 14:05:17 [INF] HTTP POST /api/auth/refresh responded 200 in 134.6449 ms
+2026-06-18 14:05:17 [INF] Start processing HTTP request POST http://localhost:8000/search
+2026-06-18 14:05:17 [INF] Sending HTTP request POST http://localhost:8000/search
+2026-06-18 14:05:29 [INF] Received HTTP response headers after 11952.2076ms - 200
+2026-06-18 14:05:29 [INF] End processing HTTP request after 11957.8015ms - 200
+2026-06-18 14:05:29 [INF] HTTP POST /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 200 in 12009.5308 ms
+2026-06-18 14:05:29 [INF] HTTP OPTIONS /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 204 in 0.3378 ms
+2026-06-18 14:05:29 [INF] HTTP OPTIONS /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 204 in 0.0290 ms
+2026-06-18 14:05:29 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 200 in 11.0762 ms
+2026-06-18 14:05:29 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 200 in 20.6122 ms
