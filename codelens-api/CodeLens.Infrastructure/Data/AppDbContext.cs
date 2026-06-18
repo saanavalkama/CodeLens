@@ -18,8 +18,6 @@ public class AppDbContext: DbContext
 
    public DbSet<Message>Messages {get;set;}
 
-   public DbSet<FileChunk>Chunks{get;set;}
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -95,18 +93,6 @@ public class AppDbContext: DbContext
                 .HasForeignKey(m => m.ConversationId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-
-        modelBuilder.Entity<FileChunk>(entity =>
-        {
-            entity.HasKey(c => c.Id);
-            entity.ToTable("FileChunks");
-            entity
-                .HasOne<RepositoryFile>()
-                .WithMany()
-                .HasForeignKey(c => c.RepositoryFileId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-        
 
     }
 

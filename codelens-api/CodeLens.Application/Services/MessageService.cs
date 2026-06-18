@@ -29,12 +29,6 @@ public class MessageService : IMessageService
             ?? throw new NotFoundException("Conversation");
        if(conversation.UserId != userId) throw new UnauthorizedException("No access to this resource");
 
-       if(string.IsNullOrEmpty(conversation.Title))
-        {
-            conversation.Title = message.Length > 50 ? message[..50] : message;
-            await _conversationRepository.UpdateAsync(conversation);
-        }
-
        var history = await _messageRepository.GetNByConversationIdAsync(conversationId, 10);
 
        var requestDto = new SearchRequestDto(

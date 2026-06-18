@@ -50,15 +50,4 @@ public class FileRepository : IFileRepository
             .ToListAsync();
         return files;
     }
-
-    public async Task DeleteBatch(List<RepositoryFile> files)
-    {
-        var ids = files.Select(f => f.Id).ToList();
-        var entities = await _context.RepositoryFiles
-            .Where(f => ids.Contains(f.Id))
-            .ToListAsync();
-
-        _context.RepositoryFiles.RemoveRange(entities);
-        await _context.SaveChangesAsync();
-    }
 }

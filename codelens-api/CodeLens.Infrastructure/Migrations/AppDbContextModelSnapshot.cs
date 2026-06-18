@@ -59,22 +59,6 @@ namespace CodeLens.Infrastructure.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("CodeLens.Domain.Entites.FileChunk", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("RepositoryFileId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RepositoryFileId");
-
-                    b.ToTable("FileChunks", (string)null);
-                });
-
             modelBuilder.Entity("CodeLens.Domain.Entites.Repository", b =>
                 {
                     b.Property<Guid>("Id")
@@ -303,15 +287,6 @@ namespace CodeLens.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CodeLens.Domain.Entites.FileChunk", b =>
-                {
-                    b.HasOne("CodeLens.Domain.Entites.RepositoryFile", null)
-                        .WithMany()
-                        .HasForeignKey("RepositoryFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("CodeLens.Domain.Entites.Repository", b =>

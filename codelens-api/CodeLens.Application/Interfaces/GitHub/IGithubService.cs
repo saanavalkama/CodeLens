@@ -12,6 +12,4 @@ public interface IGitHubService
     Task<IndexDto>GetFilesByRepoIdAsync(Guid repoId, Guid userId);
 
     Task<RepoStatusDto>GetRepoStatusAsync(Guid userId, Guid repoId);
-
-    Task ReIndexRepo(Guid repoId, Guid userId);
 }

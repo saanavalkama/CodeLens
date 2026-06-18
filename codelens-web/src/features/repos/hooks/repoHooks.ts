@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { repoServices } from "../services/repoServices"
 import { useMe } from "../../auth/hooks/authHooks"
 import { useEffect } from "react"
-import { toast } from "sonner"
 
 export const useRepos = () => {
     const {data:me} = useMe()
@@ -82,15 +81,3 @@ export const useAutoIndexRepo = (repoId: string) => {
     indexingStatus: connectRepo.data?.indexingStatus
   };
 };
-
-export const useReIndex = () => {
-    const qc = useQueryClient()
-    return useMutation({
-        mutationFn:(repoId:string) => repoServices.reIndex(repoId),
-        onSuccess:(_,repoId)=>{
-            toast.success("Re-indexing started")
-            qc.invalidateQueries({queryKey:['indexing-status', repoId]})
-        },
-        onError:()=>toast.error("Failed to re-index this repository")
-    })
-}
