@@ -31,7 +31,7 @@ export const repoServices = {
     },
 
     reIndex: async(repoId:string):Promise<void> => {
-        await api.post(`${baseUrl}/${repoId}/re-index`)    
+        await api.post(`${baseUrl}/repos/${repoId}/re-index`)    
     }
 
 }
