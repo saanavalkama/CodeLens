@@ -1,5 +1,6 @@
 using CodeLens.Domain.Entites;
 using CodeLens.Domain.Entites.Auth;
+using CodeLens.Domain.Entites.Graph;
 using CodeLens.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,10 @@ public class AppDbContext: DbContext
    public DbSet<Message>Messages {get;set;}
 
    public DbSet<FileChunk>Chunks{get;set;}
+
+   public DbSet<GraphNode> GraphNodes { get; set; }
+    public DbSet<GraphEdge> GraphEdges { get; set; }
+    public DbSet<FileContent> FileContents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,6 +109,51 @@ public class AppDbContext: DbContext
                 .HasOne<RepositoryFile>()
                 .WithMany()
                 .HasForeignKey(c => c.RepositoryFileId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<GraphNode>(entity =>
+        {
+            entity.HasKey(g => g.Id);
+            entity.ToTable("GraphNodes");
+            entity.HasIndex(g => new {g.RepositoryId, g.Name});
+            entity.HasIndex(g => g.RepositoryId);
+            entity.HasIndex(n => n.FilePath);
+            entity
+                .HasOne(g => g.Repository)
+                .WithMany()
+                .HasForeignKey(g => g.RepositoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<GraphEdge>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.ToTable("GraphEdges");
+            entity.HasIndex(e => new {e.RepositoryId, e.SouceId});
+            entity.HasIndex(e => new {e.RepositoryId, e.TargetId});
+            entity
+                .HasOne(e => e.Source)
+                .WithMany(n => n.OutgoingEdges)
+                .HasForeignKey(e => e.SouceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasOne(e => e.Target)
+                .WithMany(n => n.IncomingEdges)
+                .HasForeignKey(e=>e.TargetId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<FileContent>(entity =>
+        {
+            entity.HasKey(f => f.Id);
+            entity.ToTable("FileContents");
+            entity.HasIndex( f => f.RepositoryFileId).IsUnique();
+            entity
+                .HasOne(f => f.RepositoryFile)
+                .WithMany()
+                .HasForeignKey(f => f.RepositoryFileId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         
