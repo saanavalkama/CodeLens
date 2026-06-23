@@ -56,3 +56,12 @@ class FileChunk(Base):
     start_line = Column("StartLine", Integer)
     end_line = Column("EndLine", Integer)
     created_at = Column("CreatedAt", DateTime, default=datetime.utcnow)
+
+class FileContent(Base):
+    __tablename__ = "FileContents"
+
+    id = Column("Id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    repository_file_id = Column("RepositoryFileId",UUID(as_uuid=True),ForeignKey("RepositoryFiles.Id", ondelete="CASCADE"),unique=True)
+    repository_file = relationship("RepositoryFile",lazy="raise")
+    content = Column("Content",Text)
+    created_at = Column("CreatedAt",DateTime, default=datetime.utcnow)

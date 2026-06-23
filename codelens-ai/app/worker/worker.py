@@ -5,7 +5,7 @@ import traceback
 import redis.asyncio as aioredis
 from sqlalchemy import select, text
 from app.db.session import AsyncSessionLocal
-from app.models.models import User, Repository, RepositoryFile, FileChunk
+from app.models.models import User, Repository, RepositoryFile, FileChunk, FileContent
 from app.services.fetchContents import fetch_contents, FetchStatus
 from app.services.fetch_tokens import fetch_tokens
 from app.services.decrypt import decrypt_token
@@ -23,7 +23,7 @@ class IndexingStatus:
     Completed = 2
     Failed = 3
 
-async def process_job(repo_id: str, user_id: str):
+async def process_job(r,repo_id: str, user_id: str):
     print("process started")
     repo_uuid = uuid.UUID(repo_id)
     user_uuid = uuid.UUID(user_id)
@@ -112,6 +112,14 @@ async def process_job(repo_id: str, user_id: str):
                 await err_db.commit()
             continue
 
+        async with AsyncSessionLocal() as content_db:
+            file_content = FileContent(
+                repository_file_id = file_id,
+                content=content
+            )
+            content_db.add(file_content)
+            await content_db.commit()
+
         chunks = chunk_file(content, file_path)
         embedded = embed_chunks(chunks)
 
@@ -143,6 +151,11 @@ async def process_job(repo_id: str, user_id: str):
         )
         await final_db.commit()
 
+    await r.xadd("graph-jobs",{
+        "repoId":str(repo_uuid),
+        "userId":str(user_uuid)
+    })
+
     print(f"files processed for {repo_id}")
 
 async def _process_entries(r, entries):
@@ -156,7 +169,7 @@ async def _process_entries(r, entries):
         repo_id = repo_id_bytes.decode()
         user_id = user_id_bytes.decode()
         try:
-            await process_job(repo_id, user_id)
+            await process_job(r, repo_id, user_id)
             await r.xack(STREAM_NAME, GROUP_NAME, entry_id)
         except Exception as e:
             print(f"Failed to process job {entry_id}: {e}")
@@ -179,6 +192,11 @@ async def start_worker():
 
             try:
                 await r.xgroup_create(STREAM_NAME, GROUP_NAME, id="0", mkstream=True)
+            except Exception:
+                pass
+
+            try:
+                await r.xgroup_create("graph-jobs","graph-group", id="0",mkstream=True)
             except Exception:
                 pass
 
