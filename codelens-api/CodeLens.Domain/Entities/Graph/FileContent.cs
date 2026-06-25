@@ -10,5 +10,5 @@ public class FileContent
 
     public string Content {get;set;} = string.Empty;
 
-    DateTime CreatedAt {get;set;} = DateTime.UtcNow;
+    public DateTime CreatedAt {get;set;} = DateTime.UtcNow;
 }

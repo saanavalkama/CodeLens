@@ -2,5 +2,6 @@
   <Project Path="CodeLens.API/CodeLens.API.csproj" />
   <Project Path="CodeLens.Application/CodeLens.Application.csproj" />
   <Project Path="CodeLens.Domain/CodeLens.Domain.csproj" />
+  <Project Path="CodeLens.GraphWorker/CodeLens.GraphWorker.csproj" />
   <Project Path="CodeLens.Infrastructure/CodeLens.Infrastructure.csproj" />
 </Solution>
