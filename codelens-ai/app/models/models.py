@@ -65,3 +65,24 @@ class FileContent(Base):
     repository_file = relationship("RepositoryFile",lazy="raise")
     content = Column("Content",Text)
     created_at = Column("CreatedAt",DateTime, default=datetime.utcnow)
+
+class GraphNode(Base):
+    __tablename__ = "GraphNodes"
+
+    id = Column("Id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    repository_id = Column("RepositoryId", UUID(as_uuid=True), ForeignKey("Repositories.Id", ondelete="CASCADE"))
+    node_type = Column("NodeType", String)
+    name = Column("Name", String)
+    file_path = Column("FilePath", String)
+    signature = Column("Signature", String, nullable=True)
+    start_line = Column("StartLine", Integer)
+    end_line = Column("EndLine", Integer)
+
+class GraphEdge(Base):
+    __tablename__ = "GraphEdges"
+
+    id = Column("Id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    repository_id = Column("RepositoryId", UUID(as_uuid=True), ForeignKey("Repositories.Id", ondelete="CASCADE"))
+    source_id = Column("SourceId", UUID(as_uuid=True), ForeignKey("GraphNodes.Id", ondelete="CASCADE"))
+    target_id = Column("TargetId", UUID(as_uuid=True), ForeignKey("GraphNodes.Id", ondelete="CASCADE"))
+    edge_type = Column("EdgeType", String)

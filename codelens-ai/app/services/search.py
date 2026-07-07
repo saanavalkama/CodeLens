@@ -1,6 +1,6 @@
 from app.models.search import SearchRequest, SearchResponse, ChunkDto, TokenUsage
 from app.services.embedder import embed_query
-from app.services.retrieval import retrieve_chunks
+from app.services.retrieval import retrieve_chunks_hybrid
 from openai import AsyncOpenAI
 from sqlalchemy import select
 from app.db.session import AsyncSessionLocal
@@ -8,6 +8,7 @@ from app.services.decrypt import decrypt_token
 from app.models.models import User
 import uuid
 import os
+import asyncio
 
 class SearchService:
 
@@ -24,8 +25,8 @@ class SearchService:
     async def search(self, request:SearchRequest) -> SearchResponse:
         api_key = await self._get_openai_key(request.userId)
         client = AsyncOpenAI(api_key=api_key)
-        embedded = embed_query(request.query)
-        chunks = await retrieve_chunks(request.repoId, embedded, 8)
+        embedded = await asyncio.to_thread(embed_query(request.query))
+        chunks = await retrieve_chunks_hybrid(request.repoId, request.query, embedded, 8)
         messages = self._build_prompt(request.query, chunks, request.history)
         answer, usage =  await self._call_LLM(client,messages)
         return SearchResponse(

@@ -16,6 +16,8 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 STREAM_NAME = "indexing-jobs"
 GROUP_NAME = "indexing-group"
 CONSUMER_NAME = "worker-1"
+SUMMARY_STREAM_NAME = "repo-summary-jobs"
+SUMMARY_GROUP_NAME = "summary-group"
 
 class IndexingStatus:
     Pending = 0
@@ -63,6 +65,9 @@ async def process_job(r,repo_id: str, user_id: str):
     print(f"Indexing {len(file_data)} pending files for repo {repo_id}")
 
     for file_id, file_path in file_data:
+
+    
+        
         status, content = await fetch_contents(decrypted_token, githubusername, repo_name, file_path)
 
         if status == FetchStatus.UNAUTHORIZED:
@@ -112,13 +117,6 @@ async def process_job(r,repo_id: str, user_id: str):
                 await err_db.commit()
             continue
 
-        async with AsyncSessionLocal() as content_db:
-            file_content = FileContent(
-                repository_file_id = file_id,
-                content=content
-            )
-            content_db.add(file_content)
-            await content_db.commit()
 
         chunks = chunk_file(content, file_path)
         embedded = embed_chunks(chunks)
@@ -151,10 +149,7 @@ async def process_job(r,repo_id: str, user_id: str):
         )
         await final_db.commit()
 
-    await r.xadd("graph-jobs",{
-        "repoId":str(repo_uuid),
-        "userId":str(user_uuid)
-    })
+    r.xadd(SUMMARY_STREAM_NAME, {"repoId":repo_id, "userId":user_id} )
 
     print(f"files processed for {repo_id}")
 
@@ -192,11 +187,6 @@ async def start_worker():
 
             try:
                 await r.xgroup_create(STREAM_NAME, GROUP_NAME, id="0", mkstream=True)
-            except Exception:
-                pass
-
-            try:
-                await r.xgroup_create("graph-jobs","graph-group", id="0",mkstream=True)
             except Exception:
                 pass
 

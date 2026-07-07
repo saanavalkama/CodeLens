@@ -130,12 +130,12 @@ public class AppDbContext: DbContext
         {
             entity.HasKey(e => e.Id);
             entity.ToTable("GraphEdges");
-            entity.HasIndex(e => new {e.RepositoryId, e.SouceId});
+            entity.HasIndex(e => new {e.RepositoryId, e.SourceId});
             entity.HasIndex(e => new {e.RepositoryId, e.TargetId});
             entity
                 .HasOne(e => e.Source)
                 .WithMany(n => n.OutgoingEdges)
-                .HasForeignKey(e => e.SouceId)
+                .HasForeignKey(e => e.SourceId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity

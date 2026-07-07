@@ -24,4 +24,4 @@ async def search(
         raise HTTPException(status_code=502, detail=f"OpenAI API error: {e.message}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
-    return SearchResponse(answer=answer)
+    return answer

@@ -8,7 +8,7 @@ public class GraphEdge
 
     public Repository Repository {get;set;} = null!;
 
-    public Guid SouceId {get;set;}
+    public Guid SourceId {get;set;}
 
     public Guid TargetId {get;set;}
 

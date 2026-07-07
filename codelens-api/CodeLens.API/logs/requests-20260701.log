@@ -1,0 +1,98 @@
+2026-07-01 09:05:57 [INF] HTTP OPTIONS /api/auth/me responded 204 in 3.0763 ms
+2026-07-01 09:05:57 [INF] HTTP GET /api/auth/me responded 401 in 31.1082 ms
+2026-07-01 09:05:57 [INF] HTTP OPTIONS /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 204 in 0.0380 ms
+2026-07-01 09:05:57 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 401 in 1.0718 ms
+2026-07-01 09:05:57 [INF] HTTP OPTIONS /api/user/openai-key responded 204 in 0.0328 ms
+2026-07-01 09:05:57 [INF] HTTP OPTIONS /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 204 in 0.0086 ms
+2026-07-01 09:05:57 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 401 in 0.1966 ms
+2026-07-01 09:05:57 [ERR] HTTP GET /api/user/openai-key responded 500 in 3.7821 ms
+CodeLens.Domain.Exceptions.UnauthorizedException: No access to this endpoint
+   at UserContoller.GetAndParseUserId() in /Users/saanavalkama/Desktop/CodeLens/codelens-api/CodeLens.API/Controllers/UserContoller.cs:line 25
+   at UserContoller.GetKeyStatusAsync() in /Users/saanavalkama/Desktop/CodeLens/codelens-api/CodeLens.API/Controllers/UserContoller.cs:line 39
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-07-01 09:05:57 [INF] HTTP OPTIONS /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 204 in 0.0156 ms
+2026-07-01 09:05:57 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 401 in 0.3290 ms
+2026-07-01 09:05:58 [INF] HTTP OPTIONS /api/auth/refresh responded 204 in 0.0191 ms
+2026-07-01 09:05:58 [INF] HTTP POST /api/auth/refresh responded 200 in 175.7912 ms
+2026-07-01 09:05:59 [INF] HTTP GET /api/auth/me responded 200 in 28.3210 ms
+2026-07-01 09:05:59 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 200 in 57.0577 ms
+2026-07-01 09:05:59 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 200 in 67.6411 ms
+2026-07-01 09:06:00 [INF] HTTP GET /api/user/openai-key responded 200 in 5.4749 ms
+2026-07-01 09:06:00 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 200 in 15.6131 ms
+2026-07-01 09:59:16 [INF] HTTP OPTIONS /api/auth/me responded 204 in 0.8738 ms
+2026-07-01 09:59:16 [INF] HTTP GET /api/auth/me responded 401 in 24.5098 ms
+2026-07-01 09:59:17 [INF] HTTP OPTIONS /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 204 in 0.0238 ms
+2026-07-01 09:59:17 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 401 in 1.6951 ms
+2026-07-01 09:59:17 [INF] HTTP OPTIONS /api/user/openai-key responded 204 in 0.0248 ms
+2026-07-01 09:59:17 [ERR] HTTP GET /api/user/openai-key responded 500 in 2.9380 ms
+CodeLens.Domain.Exceptions.UnauthorizedException: No access to this endpoint
+   at UserContoller.GetAndParseUserId() in /Users/saanavalkama/Desktop/CodeLens/codelens-api/CodeLens.API/Controllers/UserContoller.cs:line 25
+   at UserContoller.GetKeyStatusAsync() in /Users/saanavalkama/Desktop/CodeLens/codelens-api/CodeLens.API/Controllers/UserContoller.cs:line 39
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-07-01 09:59:17 [INF] HTTP OPTIONS /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 204 in 0.0133 ms
+2026-07-01 09:59:17 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 401 in 0.1439 ms
+2026-07-01 09:59:17 [INF] HTTP OPTIONS /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 204 in 0.0182 ms
+2026-07-01 09:59:17 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 401 in 0.1959 ms
+2026-07-01 09:59:17 [INF] HTTP OPTIONS /api/auth/refresh responded 204 in 0.0336 ms
+2026-07-01 09:59:17 [INF] HTTP POST /api/auth/refresh responded 200 in 87.1523 ms
+2026-07-01 09:59:17 [INF] HTTP GET /api/auth/me responded 200 in 3.1066 ms
+2026-07-01 09:59:17 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 200 in 8.9259 ms
+2026-07-01 09:59:17 [INF] HTTP GET /api/user/openai-key responded 200 in 16.4260 ms
+2026-07-01 09:59:17 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 200 in 6.6460 ms
+2026-07-01 09:59:17 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 200 in 6.2507 ms
+2026-07-01 10:53:19 [INF] HTTP OPTIONS /api/user/openai-key responded 204 in 0.3039 ms
+2026-07-01 10:53:19 [INF] HTTP OPTIONS /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 204 in 0.3068 ms
+2026-07-01 10:53:19 [INF] HTTP OPTIONS /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 204 in 0.3065 ms
+2026-07-01 10:53:19 [INF] HTTP OPTIONS /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 204 in 0.3080 ms
+2026-07-01 10:53:19 [INF] HTTP OPTIONS /api/auth/me responded 204 in 0.3220 ms
+2026-07-01 10:53:19 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 401 in 6.8099 ms
+2026-07-01 10:53:19 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 401 in 6.0029 ms
+2026-07-01 10:53:19 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 401 in 7.5790 ms
+2026-07-01 10:53:19 [INF] HTTP GET /api/auth/me responded 401 in 10.2020 ms
+2026-07-01 10:53:19 [ERR] HTTP GET /api/user/openai-key responded 500 in 9.8610 ms
+CodeLens.Domain.Exceptions.UnauthorizedException: No access to this endpoint
+   at UserContoller.GetAndParseUserId() in /Users/saanavalkama/Desktop/CodeLens/codelens-api/CodeLens.API/Controllers/UserContoller.cs:line 25
+   at UserContoller.GetKeyStatusAsync() in /Users/saanavalkama/Desktop/CodeLens/codelens-api/CodeLens.API/Controllers/UserContoller.cs:line 39
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-07-01 10:53:20 [INF] HTTP OPTIONS /api/auth/refresh responded 204 in 0.0167 ms
+2026-07-01 10:53:20 [INF] HTTP POST /api/auth/refresh responded 200 in 81.8235 ms
+2026-07-01 10:53:20 [INF] HTTP GET /api/auth/me responded 200 in 2.4697 ms
+2026-07-01 10:53:20 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 200 in 20.7782 ms
+2026-07-01 10:53:20 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 200 in 23.0335 ms
+2026-07-01 10:53:20 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 200 in 22.7595 ms
+2026-07-01 10:53:20 [INF] HTTP GET /api/user/openai-key responded 200 in 23.2412 ms
+2026-07-01 10:53:21 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 200 in 5.5803 ms
+2026-07-01 10:53:21 [INF] HTTP GET /api/user/openai-key responded 200 in 3.7130 ms

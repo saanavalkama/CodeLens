@@ -31,3 +31,16 @@ the theoretical sweet spot. PostgreSQL approximates this well enough for the acc
 of this application, while also providing relational integrity, cascade deletes, and vector 
 search in a single system. Prior operational familiarity with PostgreSQL also reduced 
 deployment and maintenance risk.
+
+##What I would do differently if cost wasn't a constraint
+
+The biggest limitation of the current implementation is that search is single-shot — one query, one retrieval, one answer. For broad architectural questions this often produces incomplete results.
+With unlimited budget I would make the search agentic in three ways:
+
+**Query decomposition**
+broad questions would be split into sub-questions and answered independently before being synthesized into a final response. For example "how does messaging work in this codebase" would decompose into "where is the message published", "what consumes it", "how are failures handled."
+**Hypothetical code embedding** 
+when natural language queries produce poor results, the agent would generate a synthetic code example representing the expected answer and use that as the search query instead. Code embeddings match better against code than natural language does.
+**Autonomous codebase traversal**
+rather than relying on a single retrieval step, the agent would iteratively query the codebase, deciding what context to fetch next based on what it already knows. This handles multi-hop questions that single retrieval misses entirely.
+The reason these aren't implemented is cost. Each agentic step requires an additional LLM call, and for a tool that developers would use frequently throughout the day, costs would compound quickly and make it impractical without enterprise-level infrastructure.
