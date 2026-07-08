@@ -39,4 +39,8 @@ public class Repository
 
     public DateTime? LastProgressAt {get;set;}
 
+    public string? Summary { get; set; }
+
+    public DateTime? SummaryGeneratedAt { get; set; }
+
 }

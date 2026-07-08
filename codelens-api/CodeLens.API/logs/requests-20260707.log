@@ -62,3 +62,35 @@ CodeLens.Domain.Exceptions.UnauthorizedException: No access to this endpoint
 2026-07-07 14:43:32 [INF] HTTP GET /api/auth/me responded 200 in 15.1402 ms
 2026-07-07 14:43:32 [INF] HTTP GET /api/user/openai-key responded 200 in 14.9178 ms
 2026-07-07 14:43:32 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 200 in 17.8783 ms
+2026-07-07 19:55:06 [INF] HTTP OPTIONS /api/auth/me responded 204 in 0.5558 ms
+2026-07-07 19:55:06 [INF] HTTP OPTIONS /api/user/openai-key responded 204 in 0.0145 ms
+2026-07-07 19:55:06 [INF] HTTP OPTIONS /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 204 in 0.0118 ms
+2026-07-07 19:55:06 [INF] HTTP OPTIONS /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 204 in 0.0015 ms
+2026-07-07 19:55:06 [INF] HTTP OPTIONS /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 204 in 0.0042 ms
+2026-07-07 19:55:06 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 401 in 0.4704 ms
+2026-07-07 19:55:06 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 401 in 0.1268 ms
+2026-07-07 19:55:06 [INF] HTTP GET /api/auth/me responded 401 in 14.4520 ms
+2026-07-07 19:55:06 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 401 in 0.0764 ms
+2026-07-07 19:55:06 [ERR] HTTP GET /api/user/openai-key responded 500 in 0.9509 ms
+CodeLens.Domain.Exceptions.UnauthorizedException: No access to this endpoint
+   at UserContoller.GetAndParseUserId() in /Users/saanavalkama/Desktop/CodeLens/codelens-api/CodeLens.API/Controllers/UserContoller.cs:line 25
+   at UserContoller.GetKeyStatusAsync() in /Users/saanavalkama/Desktop/CodeLens/codelens-api/CodeLens.API/Controllers/UserContoller.cs:line 39
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-07-07 19:55:09 [INF] HTTP OPTIONS /api/auth/refresh responded 204 in 1.0548 ms
+2026-07-07 19:55:09 [INF] HTTP POST /api/auth/refresh responded 200 in 184.8341 ms
+2026-07-07 19:55:11 [INF] HTTP GET /api/conversation/2f4a7aeb-e28b-4bc1-8589-a285bd72349a responded 200 in 5.8648 ms
+2026-07-07 19:55:11 [INF] HTTP GET /api/github/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/status responded 200 in 17.5159 ms
+2026-07-07 19:55:11 [INF] HTTP GET /api/auth/me responded 200 in 19.1059 ms
+2026-07-07 19:55:11 [INF] HTTP GET /api/chat/2f4a7aeb-e28b-4bc1-8589-a285bd72349a/05c9d48a-e783-49a4-b4c5-03975190cf91 responded 200 in 33.3457 ms
+2026-07-07 19:55:11 [INF] HTTP GET /api/user/openai-key responded 200 in 4.4430 ms

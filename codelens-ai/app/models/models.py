@@ -30,6 +30,8 @@ class Repository(Base):
     user_id = Column("UserId", UUID(as_uuid=True))
     indexing_status = Column("IndexingStatus", Integer)
     last_progress_at = Column("LastProgressAt", DateTime, nullable=True)
+    summary = Column("Summary", String, nullable=True)
+    summary_generated_at = Column("SummaryGeneratedAt", DateTime, nullable=True)
 
 class RepositoryFile(Base):
     __tablename__ = "RepositoryFiles"
