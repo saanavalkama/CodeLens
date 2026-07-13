@@ -149,7 +149,7 @@ async def process_job(r,repo_id: str, user_id: str):
         )
         await final_db.commit()
 
-    r.xadd(SUMMARY_STREAM_NAME, {"repoId":repo_id, "userId":user_id} )
+    await r.xadd(SUMMARY_STREAM_NAME, {"repoId":repo_id, "userId":user_id} )
 
     print(f"files processed for {repo_id}")
 
