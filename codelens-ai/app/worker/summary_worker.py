@@ -11,6 +11,7 @@ from app.services.decrypt import decrypt_token
 from app.services.tool_functions import read_file as _read_file, list_files as _list_files, search as _search
 from openai import AsyncOpenAI
 
+
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 CONSUMER_NAME = "summary-worker-1"
 SUMMARY_STREAM_NAME = "repo-summary-jobs"

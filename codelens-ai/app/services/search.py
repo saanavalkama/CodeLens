@@ -25,7 +25,7 @@ class SearchService:
     async def search(self, request:SearchRequest) -> SearchResponse:
         api_key = await self._get_openai_key(request.userId)
         client = AsyncOpenAI(api_key=api_key)
-        embedded = await asyncio.to_thread(embed_query(request.query))
+        embedded = await asyncio.to_thread(embed_query, request.query)
         chunks = await retrieve_chunks_hybrid(request.repoId, request.query, embedded, 8)
         messages = self._build_prompt(request.query, chunks, request.history)
         answer, usage =  await self._call_LLM(client,messages)

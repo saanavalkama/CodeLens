@@ -1,126 +1,256 @@
-import asyncpg
+import asyncio
 import os
-from dataclasses import dataclass
-from services import clean_query
+import uuid
+import traceback
+import redis.asyncio as aioredis
+from sqlalchemy import select, text
+from app.db.session import AsyncSessionLocal
+from app.models.models import User, Repository, RepositoryFile, FileChunk, FileContent
+from app.services.fetchContents import fetch_contents, FetchStatus
+from app.services.fetch_tokens import fetch_tokens
+from app.services.decrypt import decrypt_token
+from app.services.chunking import chunk_file
+from app.services.embedder import embed_chunks
 
-@dataclass
-class RetrievedChunk:
-    id:str
-    content: str
-    file_path: str
-    start_line: int
-    end_line: int
-    similarity: float
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+STREAM_NAME = "indexing-jobs"
+GROUP_NAME = "indexing-group"
+CONSUMER_NAME = "worker-1"
+SUMMARY_STREAM_NAME = "repo-summary-jobs"
+SUMMARY_GROUP_NAME = "summary-group"
 
-async def retrieve_chunks_hybrid(
-        repo_id:str,
-        query_text:str,
-        query_embedding:list[float],
-        limit: int=8
-) -> list[RetrievedChunk]:
-    vector_results = await retrieve_chunks(repo_id, query_embedding, limit)
-    fts_results = await retrieve_chunks_fts(repo_id, query_text, limit)
-    return reciprocal_rank_fusion([vector_results, fts_results])[:8]
+class IndexingStatus:
+    Pending = 0
+    Indexing = 1
+    Completed = 2
+    Failed = 3
 
+async def process_job(r,repo_id: str, user_id: str):
+    print("process started")
+    repo_uuid = uuid.UUID(repo_id)
+    user_uuid = uuid.UUID(user_id)
 
-async def retrieve_chunks(
-    repo_id: str,
-    query_embedding: list[float],
-    limit: int = 8
-) -> list[RetrievedChunk]:
-    conn = await asyncpg.connect(os.getenv("DATABASE_URL"))
-    
-    try:
-        rows = await conn.fetch("""
-            SELECT
-                fc."Id" as id,
-                fc."Content" as content,
-                fc."StartLine" as start_line,
-                fc."EndLine" as end_line,
-                rf."Path" as file_path,
-                1 - (fc."Embedding" <=> $1::vector) AS similarity
-            FROM "FileChunks" fc
-            JOIN "RepositoryFiles" rf ON fc."RepositoryFileId" = rf."Id"
-            WHERE rf."RepositoryId" = $2::uuid
-            ORDER BY fc."Embedding" <=> $1::vector
-            LIMIT $3
-        """, str(query_embedding), repo_id, limit)
+    async with AsyncSessionLocal() as db:
+        files_result = await db.execute(
+            select(RepositoryFile)
+            .where(RepositoryFile.repository_id == repo_uuid)
+            .where(RepositoryFile.indexing_status == IndexingStatus.Pending)
+        )
+        files = files_result.scalars().all()
 
-        return [
-            RetrievedChunk(
-                content=row["content"],
-                file_path=row["file_path"],
-                start_line=row["start_line"],
-                end_line=row["end_line"],
-                similarity=row["similarity"],
-                id=str(row["id"])
-                
+        user_result = await db.execute(select(User).where(User.id == user_uuid))
+        user = user_result.scalar_one_or_none()
+
+        repo_result = await db.execute(select(Repository).where(Repository.id == repo_uuid))
+        repo = repo_result.scalar_one_or_none()
+
+        if not user or not repo:
+            print(f"No user or repo found for {repo_id}")
+            return
+
+        if not files:
+            print(f"No pending files for repo {repo_id}")
+            await db.execute(
+                text('UPDATE "Repositories" SET "IndexingStatus" = :status WHERE "Id" = :repo_id'),
+                {"status": IndexingStatus.Completed, "repo_id": repo_uuid}
             )
-            for row in rows
-        ]
-    finally:
-        await conn.close()
+            await db.commit()
+            return
 
-async def retrieve_chunks_fts(
-    repo_id: str,
-    query_text: str,
-    limit: int = 8
-) -> list[RetrievedChunk]:
-    cleaned = clean_query(query_text)
-    terms = cleaned.split()
-    
-    if not terms:
-        return []  # nothing meaningful left to search
-    
-    tsquery_str = " | ".join(terms)
-    
-    conn = await asyncpg.connect(os.getenv("DATABASE_URL"))
+        repo_name = repo.full_name.split("/")[1]
+        githubusername = user.github_username
+        file_data = [(file.id, file.path) for file in files]
 
-    try:
-        rows = await conn.fetch("""
-            SELECT
-                fc."Id" as id,
-                fc."Content" as content,
-                fc."StartLine" as start_line,
-                fc."EndLine" as end_line,
-                rf."Path" as file_path,
-                ts_rank(fc.search_vector, to_tsquery('simple', $1)) AS similarity
-            FROM "FileChunks" fc
-            JOIN "RepositoryFiles" rf ON fc."RepositoryFileId" = rf."Id"
-            WHERE rf."RepositoryId" = $2::uuid
-            AND fc.search_vector @@ to_tsquery('simple', $1)
-            ORDER BY similarity DESC
-            LIMIT $3
-        """, tsquery_str, repo_id, limit)
+    print(f"Indexing {len(file_data)} pending files for repo {repo_id}")
 
-        return [
-            RetrievedChunk(
-                content=row["content"],
-                file_path=row["file_path"],
-                start_line=row["start_line"],
-                end_line=row["end_line"],
-                similarity=row["similarity"],
-                id=str(row["id"])
+    # Shared token state + lock: several files can hit UNAUTHORIZED at once once
+    # the token expires mid-batch. Only the first one should actually refresh;
+    # the rest wait for that result instead of each calling GitHub's refresh
+    # endpoint themselves (which can invalidate a rotating refresh token).
+    token_state = {"token": decrypt_token(user.github_access_token)}
+    refresh_state = {"attempted": False, "ok": False}
+    token_lock = asyncio.Lock()
+
+    async def ensure_fresh_token() -> bool:
+        async with token_lock:
+            if refresh_state["attempted"]:
+                return refresh_state["ok"]
+            flag = await fetch_tokens(user_id)
+            refresh_state["attempted"] = True
+            refresh_state["ok"] = flag
+            if flag:
+                async with AsyncSessionLocal() as token_db:
+                    result = await token_db.execute(select(User).where(User.id == user_uuid))
+                    refreshed_user = result.scalar_one_or_none()
+                    token_state["token"] = decrypt_token(refreshed_user.github_access_token)
+            return flag
+
+    # Bounded concurrency: process several files at once per repo instead of
+    # one at a time, without letting one huge repo hammer GitHub/DB unbounded.
+    sem = asyncio.Semaphore(8)
+
+    async def process_one_file(file_id, file_path) -> str:
+        async with sem:
+            status, content = await fetch_contents(
+                token_state["token"], githubusername, repo_name, file_path
             )
-            for row in rows
-        ]
-    finally:
-        await conn.close()
 
-    
-RRF_K = 60  
+            if status == FetchStatus.UNAUTHORIZED:
+                if not await ensure_fresh_token():
+                    print(f"Token refresh failed for user {user_id}")
+                    return "auth_failed"
 
-def reciprocal_rank_fusion(
-    rankings: list[list[RetrievedChunk]],#vector and fts
-    k: int = RRF_K
-) -> list[RetrievedChunk]:
-    scores: dict[str, float] = {}
-    chunks_by_id: dict[str, RetrievedChunk] = {}
+                status, content = await fetch_contents(
+                    token_state["token"], githubusername, repo_name, file_path
+                )
 
-    for ranking in rankings:
-        for rank, chunk in enumerate(ranking):
-            scores[chunk.id] = scores.get(chunk.id, 0.0) + 1.0 / (k + rank + 1)
-            chunks_by_id.setdefault(chunk.id, chunk)  # keep first-seen version
+                if status != FetchStatus.OK or content is None:
+                    print(f"Retry failed for {file_path}")
+                    async with AsyncSessionLocal() as err_db:
+                        await err_db.execute(
+                            text('UPDATE "RepositoryFiles" SET "IndexingStatus" = :status WHERE "Id" = :id'),
+                            {"status": IndexingStatus.Failed, "id": file_id}
+                        )
+                        await err_db.execute(
+                            text('UPDATE "Repositories" SET "IndexedFiles" = "IndexedFiles" + 1, "LastProgressAt" = NOW() WHERE "Id" = :repo_id'),
+                            {"repo_id": repo_uuid}
+                        )
+                        await err_db.commit()
+                    return "skipped"
 
-    ranked_ids = sorted(scores, key=scores.get, reverse=True)
-    return [chunks_by_id[cid] for cid in ranked_ids]
+            if status == FetchStatus.ERROR or content is None:
+                print(f"Skipping {file_path}")
+                async with AsyncSessionLocal() as err_db:
+                    await err_db.execute(
+                        text('UPDATE "RepositoryFiles" SET "IndexingStatus" = :status WHERE "Id" = :id'),
+                        {"status": IndexingStatus.Failed, "id": file_id}
+                    )
+                    await err_db.execute(
+                        text('UPDATE "Repositories" SET "IndexedFiles" = "IndexedFiles" + 1, "LastProgressAt" = NOW() WHERE "Id" = :repo_id'),
+                        {"repo_id": repo_uuid}
+                    )
+                    await err_db.commit()
+                return "skipped"
+
+            # chunk_file / embed_chunks are synchronous, CPU-bound calls
+            # (tree-sitter parsing + a local transformer model). Run them in
+            # a worker thread so they don't block the event loop that's also
+            # serving live search requests from this same process.
+            chunks = await asyncio.to_thread(chunk_file, content, file_path)
+            embedded = await asyncio.to_thread(embed_chunks, chunks)
+
+            async with AsyncSessionLocal() as file_db:
+                for chunk, vector in embedded:
+                    db_chunk = FileChunk(
+                        repository_file_id=file_id,
+                        content=chunk.content,
+                        embedding=vector,
+                        chunk_index=chunk.chunk_index,
+                        start_line=chunk.start_line,
+                        end_line=chunk.end_line,
+                    )
+                    file_db.add(db_chunk)
+                await file_db.execute(
+                    text('UPDATE "RepositoryFiles" SET "IndexingStatus" = :status WHERE "Id" = :id'),
+                    {"status": IndexingStatus.Completed, "id": file_id}
+                )
+                await file_db.execute(
+                    text('UPDATE "Repositories" SET "IndexedFiles" = "IndexedFiles" + 1, "LastProgressAt" = NOW() WHERE "Id" = :repo_id'),
+                    {"repo_id": repo_uuid}
+                )
+                await file_db.commit()
+            return "ok"
+
+    results = await asyncio.gather(
+        *(process_one_file(file_id, file_path) for file_id, file_path in file_data)
+    )
+
+    if "auth_failed" in results:
+        async with AsyncSessionLocal() as fail_db:
+            await fail_db.execute(
+                text('UPDATE "Repositories" SET "IndexingStatus" = :status WHERE "Id" = :repo_id'),
+                {"status": IndexingStatus.Failed, "repo_id": repo_uuid}
+            )
+            await fail_db.commit()
+        return
+
+    async with AsyncSessionLocal() as final_db:
+        await final_db.execute(
+            text('UPDATE "Repositories" SET "IndexingStatus" = :status WHERE "Id" = :repo_id'),
+            {"status": IndexingStatus.Completed, "repo_id": repo_uuid}
+        )
+        await final_db.commit()
+
+    await r.xadd(SUMMARY_STREAM_NAME, {"repoId":repo_id, "userId":user_id} )
+
+    print(f"files processed for {repo_id}")
+
+async def _process_entries(r, entries):
+    for entry_id, data in entries:
+        repo_id_bytes = data.get(b"repoId")
+        user_id_bytes = data.get(b"userId")
+        if not repo_id_bytes or not user_id_bytes:
+            print(f"Missing repoId or userId in entry {entry_id}: {data}")
+            await r.xack(STREAM_NAME, GROUP_NAME, entry_id)
+            continue
+        repo_id = repo_id_bytes.decode()
+        user_id = user_id_bytes.decode()
+        try:
+            await process_job(r, repo_id, user_id)
+            await r.xack(STREAM_NAME, GROUP_NAME, entry_id)
+        except Exception as e:
+            print(f"Failed to process job {entry_id}: {e}")
+            traceback.print_exc()
+            async with AsyncSessionLocal() as db:
+                try:
+                    await db.execute(
+                        text('UPDATE "Repositories" SET "IndexingStatus" = :status WHERE "Id" = :repo_id'),
+                        {"status": IndexingStatus.Failed, "repo_id": uuid.UUID(repo_id)}
+                    )
+                    await db.commit()
+                except Exception as db_e:
+                    print(f"Failed to update status to Failed for {repo_id}: {db_e}")
+
+
+async def start_worker():
+    while True:
+        try:
+            r = await aioredis.from_url(REDIS_URL)
+
+            try:
+                await r.xgroup_create(STREAM_NAME, GROUP_NAME, id="0", mkstream=True)
+            except Exception:
+                pass
+
+            print("Worker started, listening for jobs...")
+
+            pending = await r.xreadgroup(
+                GROUP_NAME, CONSUMER_NAME, {STREAM_NAME: "0"}, count=100
+            )
+            if pending:
+                for _, entries in pending:
+                    print(f"Recovering {len(entries)} pending message(s)")
+                    await _process_entries(r, entries)
+
+            while True:
+                try:
+                    messages = await r.xreadgroup(
+                        GROUP_NAME,
+                        CONSUMER_NAME,
+                        {STREAM_NAME: ">"},
+                        block=5000,
+                        count=1,
+                    )
+                except Exception as e:
+                    print(f"xreadgroup error: {e}")
+                    break
+
+                if not messages:
+                    continue
+
+                for _, entries in messages:
+                    await _process_entries(r, entries)
+
+        except Exception as e:
+            print(f"Worker connection error: {e}, retrying in 5s...")
+            await asyncio.sleep(5)
